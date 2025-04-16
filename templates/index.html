@@ -10,8 +10,8 @@
 <body data-bs-theme="dark">
     <div class="container py-4">
         <header class="pb-3 mb-4 border-bottom">
-            <h1 class="display-5 fw-bold">Парсер информации о Kindle книге</h1>
-            <p class="lead">Извлечение информации о книге из Amazon Kindle</p>
+            <h1 class="display-5 fw-bold">Парсер Kindle Cloud Reader</h1>
+            <p class="lead">Извлечение текста книги из Kindle Cloud Reader</p>
         </header>
 
         <div class="row">
@@ -37,25 +37,24 @@
                             </div>
                             <div class="mb-3">
                                 <label for="output_file" class="form-label">Имя файла для сохранения</label>
-                                <input type="text" class="form-control" id="output_file" name="output_file" value="kindle_book_info.txt" required>
+                                <input type="text" class="form-control" id="output_file" name="output_file" value="kindle_book.txt" required>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="pages_to_read" class="form-label">Макс. объем информации</label>
+                                        <label for="pages_to_read" class="form-label">Количество страниц</label>
                                         <input type="number" class="form-control" id="pages_to_read" name="pages_to_read" value="100" min="1" max="1000" required>
-                                        <small class="form-text text-muted">Условное ограничение объема данных</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="page_load_time" class="form-label">Задержка запросов (сек)</label>
+                                        <label for="page_load_time" class="form-label">Задержка между страницами (сек)</label>
                                         <input type="number" class="form-control" id="page_load_time" name="page_load_time" value="3" min="1" max="10" step="0.5" required>
                                     </div>
                                 </div>
                             </div>
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary" id="startButton">Получить информацию о книге</button>
+                                <button type="submit" class="btn btn-primary" id="startButton">Запустить парсер</button>
                                 <button type="button" class="btn btn-danger" id="stopButton" disabled>Остановить</button>
                             </div>
                         </form>
@@ -71,7 +70,7 @@
                     <div class="card-body">
                         <div id="statusSection">
                             <div class="alert alert-info" id="statusMessage">
-                                Процесс не запущен
+                                Парсер не запущен
                             </div>
                             
                             <div class="progress mb-3" style="display: none;" id="progressContainer">
@@ -79,7 +78,7 @@
                             </div>
                             
                             <div class="mb-3">
-                                <p>Прогресс: <span id="currentPage">0</span> из <span id="totalPages">100</span></p>
+                                <p>Страница: <span id="currentPage">0</span> из <span id="totalPages">0</span></p>
                             </div>
                         </div>
                     </div>
@@ -108,20 +107,19 @@
                     <div class="card-body">
                         <ol>
                             <li>Введите свой email и пароль от аккаунта Amazon</li>
-                            <li>Укажите URL книги из Kindle Cloud Reader или Amazon</li>
-                            <li>Нажмите "Получить информацию о книге" и дождитесь завершения процесса</li>
+                            <li>Укажите URL книги из Kindle Cloud Reader</li>
+                            <li>Настройте количество страниц для извлечения и задержку между страницами</li>
+                            <li>Нажмите "Запустить парсер" и дождитесь завершения процесса</li>
                             <li>Результат будет сохранен в указанный файл</li>
                         </ol>
                         
-                        <div class="alert alert-info">
+                        <div class="alert alert-warning">
                             <strong>Важно:</strong> 
-                            <p>Этот инструмент предназначен для извлечения общедоступной информации о книге с Amazon:</p>
                             <ul>
-                                <li>Название, автор, описание и общая информация о книге</li>
-                                <li>Информация о доступном предпросмотре (если есть)</li>
-                                <li>Метаданные книги</li>
+                                <li>Процесс может занять продолжительное время в зависимости от количества страниц и настроенной задержки</li>
+                                <li>Не закрывайте это окно до завершения процесса</li>
+                                <li>Если процесс прерывается, попробуйте увеличить задержку между страницами</li>
                             </ul>
-                            <p><strong>Обратите внимание:</strong> Для извлечения полного текста книги из Kindle Cloud Reader требуется использовать другой подход с применением реального браузера.</p>
                         </div>
                     </div>
                 </div>
