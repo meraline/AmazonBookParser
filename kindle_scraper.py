@@ -1,14 +1,16 @@
 import time
 import os
 import logging
+import tempfile
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
 
 # Настройка логирования
 logging.basicConfig(
@@ -41,40 +43,32 @@ class KindleScraper:
         self.driver = None
         
     def setup_driver(self):
-        """Настройка и запуск веб-драйвера Chrome"""
+        """Настройка и запуск веб-драйвера Firefox"""
         try:
-            logging.info("Настройка веб-драйвера Chrome...")
-            options = webdriver.ChromeOptions()
-            # options.add_argument("--headless") # Убираем headless режим
-            options.add_argument("--no-sandbox")
-            options.add_argument("--disable-dev-shm-usage")
-            options.add_argument("--disable-gpu")
-            options.add_argument("--window-size=1920,1080")
+            logging.info("Настройка веб-драйвера Firefox...")
             
-            # Создаем временную директорию для профиля
-            import tempfile
-            import os
-            user_data_dir = os.path.join(tempfile.gettempdir(), f"chrome_profile_{os.getpid()}")
-            os.makedirs(user_data_dir, exist_ok=True)
-            logging.info(f"Используем временную директорию для профиля: {user_data_dir}")
-            options.add_argument(f"--user-data-dir={user_data_dir}")
+            # Настраиваем опции Firefox
+            options = FirefoxOptions()
+            options.set_preference("browser.download.folderList", 2)
+            options.set_preference("browser.download.manager.showWhenStarting", False)
+            options.set_preference("browser.download.dir", os.getcwd())
+            options.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/pdf")
             
-            # Маскируем автоматизацию
-            options.add_argument("--disable-blink-features=AutomationControlled")
-            options.add_experimental_option("excludeSwitches", ["enable-automation"])
-            options.add_experimental_option("useAutomationExtension", False)
+            # Отключаем headless режим, чтобы видеть процесс
+            # options.add_argument("--headless")
             
-            service = Service(ChromeDriverManager().install())
-            self.driver = webdriver.Chrome(service=service, options=options)
+            # Используем geckodriver через webdriver_manager
+            service = FirefoxService(GeckoDriverManager().install())
             
-            # Устанавливаем более длинные таймауты
+            # Запускаем Firefox с нашими опциями
+            self.driver = webdriver.Firefox(service=service, options=options)
+            
+            # Настраиваем размер окна и таймауты
+            self.driver.maximize_window()
             self.driver.set_page_load_timeout(60)
             self.driver.implicitly_wait(20)
             
-            # Маскируем automation
-            self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-            
-            logging.info("Веб-драйвер Chrome успешно настроен")
+            logging.info("Веб-драйвер Firefox успешно настроен")
             return True
         except Exception as e:
             logging.error(f"Ошибка при настройке драйвера: {e}")
