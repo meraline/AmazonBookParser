@@ -81,70 +81,57 @@ class KindleScraper:
             return False
             
     def login(self):
-        """Авторизация в Amazon"""
+        """Ожидание ручного входа пользователя"""
         try:
-            logging.info("Авторизация в Amazon...")
-            self.driver.get("https://www.amazon.com/ap/signin")
+            logging.info("Открытие страницы Kindle Cloud Reader...")
+            self.driver.get("https://read.amazon.com/")
             
-            # Ожидание загрузки страницы авторизации
-            WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.ID, "ap_email"))
-            )
+            # Даем пользователю время для входа в систему вручную
+            logging.info("Ожидание ручного входа пользователя...")
+            print("\n============================================")
+            print("Пожалуйста, войдите в свой аккаунт Amazon вручную.")
+            print("После входа перейдите в библиотеку.")
+            print("У вас есть 60 секунд для выполнения входа.")
+            print("============================================\n")
             
-            # Ввод email и продолжение
-            email_field = self.driver.find_element(By.ID, "ap_email")
-            email_field.clear()
-            email_field.send_keys(self.email)
+            # Ждем некоторое время для ручного входа
+            time.sleep(60)  # Даем пользователю 60 секунд на ручной вход
             
-            # Нажимаем "Continue"
-            continue_button = self.driver.find_element(By.ID, "continue")
-            continue_button.click()
+            logging.info("Проверка состояния входа...")
             
-            # Ожидаем появления поля пароля
-            WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.ID, "ap_password"))
-            )
-            
-            # Ввод пароля
-            password_field = self.driver.find_element(By.ID, "ap_password")
-            password_field.clear()
-            password_field.send_keys(self.password)
-            
-            # Нажимаем "Sign-In"
-            signin_button = self.driver.find_element(By.ID, "signInSubmit")
-            signin_button.click()
-            
-            # Ожидаем загрузки страницы после входа
-            time.sleep(5)
-            
-            # Проверяем, успешно ли вошли, проверяя наличие элементов ошибки
-            if "auth-error-message-box" in self.driver.page_source:
-                error_message = self.driver.find_element(By.ID, "auth-error-message-box").text
-                logging.error(f"Ошибка авторизации: {error_message}")
+            # Проверяем, что мы находимся на странице Kindle Cloud Reader
+            if "read.amazon.com" in self.driver.current_url:
+                logging.info("Пользователь успешно вошел и открыл Kindle Cloud Reader")
+                return True
+            else:
+                logging.error("Не похоже, что мы находимся на странице Kindle Cloud Reader")
                 return False
-                
-            logging.info("Авторизация успешна")
-            return True
         except Exception as e:
             logging.error(f"Ошибка при авторизации: {e}")
             return False
             
     def open_book(self):
-        """Открытие книги по URL"""
+        """Ожидание, пока пользователь откроет книгу вручную"""
         try:
-            logging.info(f"Открытие книги по URL: {self.book_url}")
-            self.driver.get(self.book_url)
+            logging.info("Ожидание, пока пользователь откроет книгу вручную...")
+            print("\n============================================")
+            print("Пожалуйста, выберите книгу 'Quantum Poker' и откройте её.")
+            print("После открытия книги в режиме чтения, у вас есть")
+            print("30 секунд для подготовки книги к скрапингу.")
+            print("Рекомендуется кликнуть по центру страницы, чтобы")
+            print("скрыть элементы интерфейса.")
+            print("============================================\n")
             
-            # Ожидаем загрузки книги
-            time.sleep(10)
+            # Ждем, пока пользователь откроет книгу
+            time.sleep(30)
             
-            # Проверяем, открылась ли книга, ищем элементы, характерные для Kindle Reader
-            if "read.amazon.com" not in self.driver.current_url:
-                logging.error("Не удалось открыть страницу книги")
+            # Проверяем, что мы находимся на странице чтения книги
+            if "read.amazon.com" in self.driver.current_url and ("/reader/" in self.driver.current_url or "/kindle-library" in self.driver.current_url):
+                logging.info("Книга успешно открыта")
+                return True
+            else:
+                logging.error("Не похоже, что мы находимся на странице чтения книги")
                 return False
-                
-            logging.info("Книга успешно открыта")
-            return True
         except Exception as e:
             logging.error(f"Ошибка при открытии книги: {e}")
             return False
