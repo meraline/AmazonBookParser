@@ -1,0 +1,99 @@
+Хорошо, автоматизировать копирование текста напрямую с **Kindle Cloud Reader** — не так просто из-за защитных механизмов Amazon. Но есть **способ обойти это с помощью автоматизации браузера** через Python + Selenium. Скрипт будет:
+
+1. Логиниться на [read.amazon.com](https://read.amazon.com/)
+2. Открывать нужную книгу (по ссылке или по ASIN)
+3. Листать страницы
+4. Извлекать текст с каждой страницы
+5. Сохранять всё в один `.txt` файл
+
+---
+
+### ⚙️ Что потребуется:
+
+- Python 3.x  
+- Библиотеки: `selenium`, `webdriver-manager`  
+- Установленный Chrome или Firefox  
+
+Установка зависимостей:
+```bash
+pip install selenium webdriver-manager
+```
+
+---
+
+### 🧠 Скрипт автоматического копирования текста из Kindle Cloud Reader
+
+```python
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
+
+# Настройки
+AMAZON_EMAIL = "your_email@example.com"
+AMAZON_PASSWORD = "your_password"
+BOOK_URL = "https://read.amazon.com/?asin=B009SE1Z9E"
+OUTPUT_FILE = "kindle_book.txt"
+PAGES_TO_READ = 50  # Сколько страниц пролистать
+
+# Запуск браузера
+driver = webdriver.Chrome(ChromeDriverManager().install())
+driver.get("https://read.amazon.com")
+
+# Вход в аккаунт Amazon
+time.sleep(2)
+driver.find_element(By.ID, "ap_email").send_keys(AMAZON_EMAIL)
+driver.find_element(By.ID, "continue").click()
+time.sleep(2)
+driver.find_element(By.ID, "ap_password").send_keys(AMAZON_PASSWORD)
+driver.find_element(By.ID, "signInSubmit").click()
+
+# Открываем книгу
+time.sleep(8)
+driver.get(BOOK_URL)
+time.sleep(10)
+
+# Клик по центру, чтобы убрать интерфейс
+driver.find_element(By.TAG_NAME, "body").click()
+time.sleep(2)
+
+# Основной цикл по страницам
+with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
+    for page in range(PAGES_TO_READ):
+        try:
+            # Найти элемент текста (может зависеть от книги)
+            content_elements = driver.find_elements(By.CLASS_NAME, 'textLayer')
+            if not content_elements:
+                content_elements = driver.find_elements(By.CLASS_NAME, 'kcrPage')
+
+            page_text = ""
+            for elem in content_elements:
+                page_text += elem.text + "\n"
+
+            f.write(f"\n\n=== Page {page + 1} ===\n")
+            f.write(page_text.strip())
+
+            # Нажимаем стрелку "вперёд"
+            body = driver.find_element(By.TAG_NAME, "body")
+            body.send_keys(Keys.ARROW_RIGHT)
+            time.sleep(2)
+        except Exception as e:
+            print(f"Ошибка на странице {page+1}: {e}")
+            break
+
+print(f"Сохранено {PAGES_TO_READ} страниц в файл: {OUTPUT_FILE}")
+driver.quit()
+```
+
+---
+
+### ❗ Важно:
+
+- Вставь свои реальные `AMAZON_EMAIL` и `AMAZON_PASSWORD`
+- Убедись, что двухфакторка **выключена**, или настрой cookie-авторизацию (отдельно подскажу)
+- Скрипт **имитирует чтение**, но Kindle может менять структуру DOM — надо тестировать на твоей книге
+
+---
+
+Хочешь, я помогу адаптировать под твой аккаунт и книгу? Или оформить это в `.exe`?
