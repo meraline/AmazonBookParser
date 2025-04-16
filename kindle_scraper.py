@@ -45,14 +45,35 @@ class KindleScraper:
         try:
             logging.info("Настройка веб-драйвера Chrome...")
             options = webdriver.ChromeOptions()
-            options.add_argument("--headless")
+            # options.add_argument("--headless") # Убираем headless режим
             options.add_argument("--no-sandbox")
             options.add_argument("--disable-dev-shm-usage")
             options.add_argument("--disable-gpu")
             options.add_argument("--window-size=1920,1080")
             
+            # Создаем временную директорию для профиля
+            import tempfile
+            import os
+            user_data_dir = os.path.join(tempfile.gettempdir(), f"chrome_profile_{os.getpid()}")
+            os.makedirs(user_data_dir, exist_ok=True)
+            logging.info(f"Используем временную директорию для профиля: {user_data_dir}")
+            options.add_argument(f"--user-data-dir={user_data_dir}")
+            
+            # Маскируем автоматизацию
+            options.add_argument("--disable-blink-features=AutomationControlled")
+            options.add_experimental_option("excludeSwitches", ["enable-automation"])
+            options.add_experimental_option("useAutomationExtension", False)
+            
             service = Service(ChromeDriverManager().install())
             self.driver = webdriver.Chrome(service=service, options=options)
+            
+            # Устанавливаем более длинные таймауты
+            self.driver.set_page_load_timeout(60)
+            self.driver.implicitly_wait(20)
+            
+            # Маскируем automation
+            self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+            
             logging.info("Веб-драйвер Chrome успешно настроен")
             return True
         except Exception as e:

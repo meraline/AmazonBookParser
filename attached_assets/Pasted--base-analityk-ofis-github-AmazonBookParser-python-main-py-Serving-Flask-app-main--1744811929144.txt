@@ -1,0 +1,111 @@
+(base) analityk@ofis:~/Документы/github/AmazonBookParser$ python main.py
+ * Serving Flask app 'main'                                                                                                                                                                                                   
+ * Debug mode: on                                                                                                                                                                                                             
+2025-04-16 16:56:29,864 - INFO - WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.                                                                       
+ * Running on all addresses (0.0.0.0)                                                                                                                                                                                         
+ * Running on http://127.0.0.1:5000                                                                                                                                                                                           
+ * Running on http://10.13.13.2:5000                                                                                                                                                                                          
+2025-04-16 16:56:29,864 - INFO - Press CTRL+C to quit                                                                                                                                                                         
+2025-04-16 16:56:29,870 - INFO -  * Restarting with watchdog (inotify)                                                                                                                                                        
+2025-04-16 16:56:30,062 - WARNING -  * Debugger is active!                                                                                                                                                                    
+2025-04-16 16:56:30,063 - INFO -  * Debugger PIN: 101-954-603
+2025-04-16 16:57:01,698 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:01] "GET / HTTP/1.1" 200 -
+2025-04-16 16:57:01,913 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:01] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-04-16 16:57:02,518 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:02] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:02,853 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:02] "GET /favicon.ico HTTP/1.1" 404 -
+2025-04-16 16:57:07,507 - INFO - Настройка веб-драйвера Chrome...
+2025-04-16 16:57:07,508 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:07] "POST /start_scraping HTTP/1.1" 200 -
+2025-04-16 16:57:07,508 - INFO - ====== WebDriver manager ======
+2025-04-16 16:57:07,517 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:07] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:07,519 - INFO - Get LATEST chromedriver version for google-chrome
+2025-04-16 16:57:07,887 - INFO - About to download new driver from https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+2025-04-16 16:57:08,172 - INFO - Driver downloading response is 200
+2025-04-16 16:57:08,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:08] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:09,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:09] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:09,572 - INFO - Get LATEST chromedriver version for google-chrome
+2025-04-16 16:57:09,934 - INFO - Get LATEST chromedriver version for google-chrome
+2025-04-16 16:57:10,163 - INFO - Driver has been saved in cache [/home/analityk/.wdm/drivers/chromedriver/linux64/114.0.5735.90]
+2025-04-16 16:57:10,529 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:10] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:11,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:11] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:12,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:12] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:13,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:13] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:14,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:14] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:15,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:15] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:16,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:16] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:17,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:17] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:18,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:18] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:19,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:19] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:20,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:20] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:21,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:21] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:22,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:22] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:23,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:23] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:24,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:24] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:25,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:25] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:26,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:26] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:27,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:27] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:28,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:28] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:29,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:29] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:30,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:30] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:31,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:31] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:32,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:32] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:33,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:33] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:34,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:34] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:35,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:35] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:36,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:36] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:37,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:37] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:38,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:38] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:39,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:39] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:40,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:40] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:41,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:41] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:42,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:42] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:43,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:43] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:44,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:44] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:45,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:45] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:46,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:46] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:47,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:47] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:48,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:48] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:49,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:49] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:50,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:50] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:51,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:51] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:52,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:52] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:53,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:53] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:54,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:54] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:55,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:55] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:56,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:56] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:57,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:57] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:58,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:58] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:57:59,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:57:59] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:58:00,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:58:00] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:58:01,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:58:01] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:58:02,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:58:02] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:58:03,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:58:03] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:58:04,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:58:04] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:58:05,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:58:05] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:58:06,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:58:06] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:58:07,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:58:07] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:58:08,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:58:08] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:58:09,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:58:09] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 16:58:10,223 - ERROR - Ошибка при настройке драйвера: Message: unknown error: DevToolsActivePort file doesn't exist
+Stacktrace:
+#0 0x56a7372124e3 <unknown>
+#1 0x56a736f41c76 <unknown>
+#2 0x56a736f6e019 <unknown>
+#3 0x56a736f6a2fa <unknown>
+#4 0x56a736f67029 <unknown>
+#5 0x56a736fa5ccc <unknown>
+#6 0x56a736fa547f <unknown>
+#7 0x56a736f9cde3 <unknown>
+#8 0x56a736f722dd <unknown>
+#9 0x56a736f7334e <unknown>
+#10 0x56a7371d23e4 <unknown>
+#11 0x56a7371d63d7 <unknown>
+#12 0x56a7371e0b20 <unknown>
+#13 0x56a7371d7023 <unknown>
+#14 0x56a7371a51aa <unknown>
+#15 0x56a7371fb6b8 <unknown>
+#16 0x56a7371fb847 <unknown>
+#17 0x56a73720b243 <unknown>
+#18 0x77c05e29caa4 <unknown>
+#19 0x77c05e329c3c <unknown>
+
+2025-04-16 16:58:10,512 - INFO - 127.0.0.1 - - [16/Apr/2025 16:58:10] "GET /get_status HTTP/1.1" 200 -

@@ -1,0 +1,52 @@
+(base) analityk@ofis:~/Документы/github/AmazonBookParser$ python main.py
+ * Serving Flask app 'main'
+ * Debug mode: on
+2025-04-16 17:06:23,040 - INFO - WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.13.13.2:5000
+2025-04-16 17:06:23,040 - INFO - Press CTRL+C to quit
+2025-04-16 17:06:23,043 - INFO -  * Restarting with watchdog (inotify)
+2025-04-16 17:06:23,238 - WARNING -  * Debugger is active!
+2025-04-16 17:06:23,238 - INFO -  * Debugger PIN: 101-954-603
+2025-04-16 17:06:42,968 - INFO - 127.0.0.1 - - [16/Apr/2025 17:06:42] "GET / HTTP/1.1" 200 -
+2025-04-16 17:06:43,006 - INFO - 127.0.0.1 - - [16/Apr/2025 17:06:43] "GET /static/css/style.css HTTP/1.1" 304 -
+2025-04-16 17:06:43,020 - INFO - 127.0.0.1 - - [16/Apr/2025 17:06:43] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:06:55,237 - INFO - Настройка веб-драйвера Chrome...
+2025-04-16 17:06:55,237 - INFO - 127.0.0.1 - - [16/Apr/2025 17:06:55] "POST /start_scraping HTTP/1.1" 200 -
+2025-04-16 17:06:55,238 - INFO - ====== WebDriver manager ======
+2025-04-16 17:06:55,241 - INFO - 127.0.0.1 - - [16/Apr/2025 17:06:55] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:06:55,247 - INFO - Get LATEST chromedriver version for google-chrome
+2025-04-16 17:06:55,613 - INFO - About to download new driver from https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+2025-04-16 17:06:55,901 - INFO - Driver downloading response is 200
+2025-04-16 17:06:56,241 - INFO - 127.0.0.1 - - [16/Apr/2025 17:06:56] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:06:57,167 - INFO - Get LATEST chromedriver version for google-chrome
+2025-04-16 17:06:57,241 - INFO - 127.0.0.1 - - [16/Apr/2025 17:06:57] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:06:57,579 - INFO - Get LATEST chromedriver version for google-chrome
+2025-04-16 17:06:57,998 - INFO - Driver has been saved in cache [/home/analityk/.wdm/drivers/chromedriver/linux64/114.0.5735.90]
+2025-04-16 17:06:58,241 - INFO - 127.0.0.1 - - [16/Apr/2025 17:06:58] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:06:58,344 - ERROR - Ошибка при настройке драйвера: Message: session not created: This version of ChromeDriver only supports Chrome version 114
+Current browser version is 135.0.7049.84 with binary path /snap/bin/chromium
+Stacktrace:
+#0 0x58c9c5cf24e3 <unknown>
+#1 0x58c9c5a21c76 <unknown>
+#2 0x58c9c5a4f04a <unknown>
+#3 0x58c9c5a4a4a1 <unknown>
+#4 0x58c9c5a47029 <unknown>
+#5 0x58c9c5a85ccc <unknown>
+#6 0x58c9c5a8547f <unknown>
+#7 0x58c9c5a7cde3 <unknown>
+#8 0x58c9c5a522dd <unknown>
+#9 0x58c9c5a5334e <unknown>
+#10 0x58c9c5cb23e4 <unknown>
+#11 0x58c9c5cb63d7 <unknown>
+#12 0x58c9c5cc0b20 <unknown>
+#13 0x58c9c5cb7023 <unknown>
+#14 0x58c9c5c851aa <unknown>
+#15 0x58c9c5cdb6b8 <unknown>
+#16 0x58c9c5cdb847 <unknown>
+#17 0x58c9c5ceb243 <unknown>
+#18 0x7d65bbe9caa4 <unknown>
+#19 0x7d65bbf29c3c <unknown>
+
+2025-04-16 17:06:59,241 - INFO - 127.0.0.1 - - [16/Apr/2025 17:06:59] "GET /get_status HTTP/1.1" 200 -

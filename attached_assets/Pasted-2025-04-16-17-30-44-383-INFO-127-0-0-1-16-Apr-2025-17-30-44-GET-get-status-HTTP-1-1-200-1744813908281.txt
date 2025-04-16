@@ -1,0 +1,20 @@
+2025-04-16 17:30:44,383 - INFO - 127.0.0.1 - - [16/Apr/2025 17:30:44] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:30:44,707 - INFO - Страница входа обнаружена, выполняем вход
+2025-04-16 17:30:45,967 - INFO - 127.0.0.1 - - [16/Apr/2025 17:30:45] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:30:46,965 - INFO - 127.0.0.1 - - [16/Apr/2025 17:30:46] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:30:47,964 - INFO - 127.0.0.1 - - [16/Apr/2025 17:30:47] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:30:48,965 - INFO - 127.0.0.1 - - [16/Apr/2025 17:30:48] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:30:49,965 - INFO - 127.0.0.1 - - [16/Apr/2025 17:30:49] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:30:51,069 - INFO - 127.0.0.1 - - [16/Apr/2025 17:30:51] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:30:51,965 - INFO - 127.0.0.1 - - [16/Apr/2025 17:30:51] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:30:52,965 - INFO - 127.0.0.1 - - [16/Apr/2025 17:30:52] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:30:53,964 - INFO - 127.0.0.1 - - [16/Apr/2025 17:30:53] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:30:54,965 - INFO - 127.0.0.1 - - [16/Apr/2025 17:30:54] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:30:55,964 - INFO - 127.0.0.1 - - [16/Apr/2025 17:30:55] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:30:56,965 - INFO - 127.0.0.1 - - [16/Apr/2025 17:30:56] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:30:57,965 - INFO - 127.0.0.1 - - [16/Apr/2025 17:30:57] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:30:58,940 - ERROR - Не удалось войти в Kindle Cloud Reader
+2025-04-16 17:30:58,972 - INFO - 127.0.0.1 - - [16/Apr/2025 17:30:58] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:30:59,002 - WARNING - Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7062f024d220>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/ed194469ce09a8bb9be1102b51b1e714
+2025-04-16 17:30:59,003 - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7062f024c2f0>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/ed194469ce09a8bb9be1102b51b1e714
+2025-04-16 17:30:59,004 - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7062f024db20>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/ed194469ce09a8bb9be1102b51b1e714

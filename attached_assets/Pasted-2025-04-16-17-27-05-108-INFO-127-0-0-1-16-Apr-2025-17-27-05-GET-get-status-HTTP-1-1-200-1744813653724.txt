@@ -1,0 +1,16 @@
+2025-04-16 17:27:05,108 - INFO - 127.0.0.1 - - [16/Apr/2025 17:27:05] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:27:06,108 - INFO - 127.0.0.1 - - [16/Apr/2025 17:27:06] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:27:06,137 - INFO - Пользователь уже авторизован в Amazon
+2025-04-16 17:27:06,137 - INFO - Открытие книги по URL: https://read.amazon.com/?x-client-id=ads-store&_encoding=UTF8&asin=B009SE1Z9E&consumptionLimitReached=false&hasMultimedia=false&requiredCapabilities=EBOK_PURCHASE_ALLOWED&ref_=ast_author_rff
+2025-04-16 17:27:07,109 - INFO - 127.0.0.1 - - [16/Apr/2025 17:27:07] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:27:08,108 - INFO - 127.0.0.1 - - [16/Apr/2025 17:27:08] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:27:09,109 - INFO - 127.0.0.1 - - [16/Apr/2025 17:27:09] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:27:10,108 - INFO - 127.0.0.1 - - [16/Apr/2025 17:27:10] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:27:11,109 - INFO - 127.0.0.1 - - [16/Apr/2025 17:27:11] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:27:12,108 - INFO - 127.0.0.1 - - [16/Apr/2025 17:27:12] "GET /get_status HTTP/1.1" 200 -
+2025-04-16 17:27:12,208 - WARNING - Кнопка 'Read now' не найдена, пробуем найти другие способы открыть книгу
+2025-04-16 17:27:12,222 - ERROR - Не удалось найти способ открыть книгу
+2025-04-16 17:27:12,335 - WARNING - Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x752f45b13860>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/a17762561ae3bc35750aaca7385079bc
+2025-04-16 17:27:12,336 - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x752f45b10d70>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/a17762561ae3bc35750aaca7385079bc
+2025-04-16 17:27:12,336 - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x752f45b13920>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/a17762561ae3bc35750aaca7385079bc
+2025-04-16 17:27:13,109 - INFO - 127.0.0.1 - - [16/Apr/2025 17:27:13] "GET /get_status HTTP/1.1" 200 -
