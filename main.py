@@ -3,9 +3,8 @@ import os
 import threading
 import time
 import logging
-from kindle_scraper import KindleScraper
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
+import traceback
+from web_scraper import KindleWebScraper, get_website_text_content
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "kindle_scraper_secret_key")
@@ -41,114 +40,73 @@ def run_scraper(email, password, book_url, output_file, pages_to_read, page_load
     try:
         scraper_status["running"] = True
         scraper_status["progress"] = 0
-        scraper_status["total_pages"] = pages_to_read
+        scraper_status["total_pages"] = 100  # Условное количество шагов процесса
         scraper_status["current_page"] = 0
         scraper_status["log_messages"] = []
         
-        log_handler("Запуск процесса извлечения текста из Kindle Cloud Reader")
+        log_handler("Запуск процесса извлечения информации о книге из Kindle Cloud Reader")
         
-        scraper = KindleScraper(
+        # Используем новый скрапер на основе trafilatura
+        scraper = KindleWebScraper(
             email=email,
             password=password,
             book_url=book_url,
             output_file=output_file,
-            pages_to_read=pages_to_read,
-            page_load_time=page_load_time
+            pages_to_read=pages_to_read
         )
         
-        # Настройка драйвера
-        log_handler("Настройка веб-драйвера...")
-        if not scraper.setup_driver():
-            log_handler("Ошибка при настройке драйвера!")
-            scraper_status["running"] = False
-            return
+        # Извлечение информации о книге
+        log_handler("Анализ URL книги и получение ASIN...")
+        scraper_status["current_page"] = 10
+        scraper_status["progress"] = 10
         
-        # Авторизация
-        log_handler("Авторизация в Amazon...")
-        if not scraper.login():
-            log_handler("Ошибка авторизации в Amazon!")
-            scraper_status["running"] = False
-            scraper.driver.quit()
-            return
+        # Получаем общедоступную информацию о книге
+        log_handler("Получение общедоступной информации о книге...")
+        scraper_status["current_page"] = 30
+        scraper_status["progress"] = 30
         
-        # Открытие книги
-        log_handler("Открытие книги...")
-        if not scraper.open_book():
-            log_handler("Ошибка при открытии книги!")
-            scraper_status["running"] = False
-            scraper.driver.quit()
-            return
+        # Попытка найти предпросмотр книги
+        log_handler("Поиск предпросмотра книги на Amazon...")
+        scraper_status["current_page"] = 50
+        scraper_status["progress"] = 50
         
-        # Клик по центру, чтобы убрать интерфейс
-        scraper.driver.find_element(By.TAG_NAME, "body").click()
-        time.sleep(2)
+        # Запускаем процесс извлечения информации
+        success = scraper.run()
         
-        # Извлечение текста
-        log_handler(f"Начало извлечения текста. Планируется прочитать {pages_to_read} страниц")
+        scraper_status["current_page"] = 100
+        scraper_status["progress"] = 100
         
-        # Создаем файл для сохранения текста
-        with open(output_file, 'w', encoding='utf-8') as f:
-            for page in range(pages_to_read):
-                try:
-                    scraper_status["current_page"] = page + 1
-                    scraper_status["progress"] = int((page + 1) / pages_to_read * 100)
-                    
-                    log_handler(f"Обработка страницы {page + 1}")
-                    
-                    # Попытка найти элементы с текстом (разные варианты селекторов)
-                    content_elements = []
-                    selectors = [
-                        "div.textLayer", 
-                        "div.kcrPage", 
-                        "div.bookReaderContainer", 
-                        "div.kindleReaderPage"
-                    ]
-                    
-                    for selector in selectors:
-                        try:
-                            elements = scraper.driver.find_elements(By.CSS_SELECTOR, selector)
-                            if elements:
-                                content_elements = elements
-                                break
-                        except:
-                            continue
-                    
-                    # Если не нашли элементы ни по одному из селекторов, попробуем извлечь весь текст страницы
-                    if not content_elements:
-                        log_handler("Не найдены стандартные элементы с текстом, извлекаем весь текст страницы")
-                        content_elements = [scraper.driver.find_element(By.TAG_NAME, "body")]
-                    
-                    # Извлекаем текст
-                    page_text = ""
-                    for elem in content_elements:
-                        elem_text = elem.text.strip()
-                        if elem_text:
-                            page_text += elem_text + "\n"
-                    
-                    # Записываем в файл
-                    f.write(f"\n\n=== Страница {page + 1} ===\n")
-                    f.write(page_text.strip())
-                    
-                    # Нажимаем стрелку "вперёд"
-                    body = scraper.driver.find_element(By.TAG_NAME, "body")
-                    body.send_keys(Keys.ARROW_RIGHT)
-                    
-                    # Ждем загрузки новой страницы
-                    time.sleep(page_load_time)
-                    
-                except Exception as e:
-                    log_handler(f"Ошибка на странице {page+1}: {str(e)}")
-                    # Продолжаем, несмотря на ошибку на одной странице
-                    continue
+        if success:
+            log_handler(f"Процесс извлечения информации о книге успешно завершен. Результаты сохранены в файл: {output_file}")
+            
+            # Добавляем уведомление о том, что для полного извлечения текста книги требуется использовать другой подход
+            log_handler("ПРИМЕЧАНИЕ: Для извлечения полного текста книги из Kindle Cloud Reader требуется использовать Selenium WebDriver с реальным браузером Chrome, что невозможно в текущей среде Replit.")
+            log_handler("Полученная информация содержит общедоступные данные о книге и, если доступно, предпросмотр контента.")
+        else:
+            log_handler("Возникли проблемы при извлечении информации о книге. Пожалуйста, проверьте URL книги.")
         
-        log_handler(f"Извлечение текста завершено. Сохранено {pages_to_read} страниц в файл: {output_file}")
+        # Дополнительно используем функцию для прямого извлечения
+        try:
+            log_handler("Попытка прямого извлечения текста с URL книги...")
+            
+            # Извлекаем общую информацию из URL книги
+            text_content = get_website_text_content(book_url)
+            
+            if text_content and len(text_content) > 50:
+                with open(output_file, 'a', encoding='utf-8') as f:
+                    f.write("\n\n=== Дополнительная информация с URL книги ===\n\n")
+                    f.write(text_content)
+                log_handler("Добавлена дополнительная информация с URL книги")
+            else:
+                log_handler("Не удалось получить дополнительную информацию с URL книги")
+        except Exception as e:
+            log_handler(f"Ошибка при попытке прямого извлечения: {str(e)}")
         
     except Exception as e:
-        log_handler(f"Ошибка в процессе скрапинга: {str(e)}")
+        error_details = traceback.format_exc()
+        log_handler(f"Ошибка в процессе извлечения информации: {str(e)}")
+        log_handler(f"Детали ошибки: {error_details}")
     finally:
-        if scraper and hasattr(scraper, 'driver') and scraper.driver:
-            scraper.driver.quit()
-            log_handler("Веб-драйвер закрыт")
         scraper_status["running"] = False
 
 
