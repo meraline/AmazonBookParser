@@ -13,7 +13,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.service import Service
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from webdriver_manager.firefox import GeckoDriverManager
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
 
 # Настраиваем логирование
 logging.basicConfig(
@@ -105,19 +105,20 @@ class KindleAutoAPIScraper:
         try:
             logging.info("Настройка веб-драйвера Firefox")
             
-            # Включаем перехват сетевых запросов
-            capabilities = DesiredCapabilities.FIREFOX
-            capabilities["loggingPrefs"] = {"performance": "ALL", "browser": "ALL"}
-            
             options = Options()
             options.add_argument("-headless")  # Запуск в фоновом режиме
+            
+            # Добавляем логгирование непосредственно в опции
             options.set_preference("devtools.netmonitor.enabled", True)
             options.set_preference("devtools.netmonitor.har.enabled", True)
             options.set_preference("devtools.netmonitor.har.defaultLogDir", os.getcwd())
             options.set_preference("devtools.netmonitor.har.enableAutoExportToFile", True)
             
+            # Добавляем настройки логгирования
+            options.log.level = "trace"  # Максимальный уровень логгирования
+            
             service = Service(GeckoDriverManager().install())
-            self.driver = webdriver.Firefox(service=service, options=options, capabilities=capabilities)
+            self.driver = webdriver.Firefox(service=service, options=options)
             self.driver.set_window_size(1366, 768)
             
             logging.info("Веб-драйвер Firefox успешно настроен")

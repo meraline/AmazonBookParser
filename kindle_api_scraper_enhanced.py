@@ -124,9 +124,15 @@ class KindleAPIScraperEnhanced:
             options.add_argument("--disable-notifications")
             
             # Включаем перехват сетевых запросов (Network domain)
-            options.set_capability(
-                "goog:loggingPrefs", {"performance": "ALL", "browser": "ALL"}
-            )
+            options.add_experimental_option("perfLoggingPrefs", {
+                "enableNetwork": True,
+                "enablePage": True
+            })
+            
+            # Добавляем логирование для Chrome
+            options.add_experimental_option("excludeSwitches", ["enable-automation"])
+            options.add_experimental_option("useAutomationExtension", False)
+            options.add_experimental_option("logging", {"performance": "ALL", "browser": "ALL"})
             
             # Инициализируем драйвер
             service = Service(ChromeDriverManager().install())

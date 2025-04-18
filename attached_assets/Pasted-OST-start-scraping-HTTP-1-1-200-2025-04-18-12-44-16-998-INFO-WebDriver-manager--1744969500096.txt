@@ -1,0 +1,22 @@
+OST /start_scraping HTTP/1.1" 200 -
+2025-04-18 12:44:16,998 - INFO - ====== WebDriver manager ======
+2025-04-18 12:44:16,998 - INFO - ====== WebDriver manager ======
+2025-04-18 12:44:16,998 - INFO - ====== WebDriver manager ======
+2025-04-18 12:44:17,003 - INFO - 127.0.0.1 - - [18/Apr/2025 12:44:17] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 12:44:17,003 - INFO - 127.0.0.1 - - [18/Apr/2025 12:44:17] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 12:44:17,003 - INFO - 127.0.0.1 - - [18/Apr/2025 12:44:17] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 12:44:17,310 - INFO - Get LATEST geckodriver version for 137.0 firefox
+2025-04-18 12:44:17,310 - INFO - Get LATEST geckodriver version for 137.0 firefox
+2025-04-18 12:44:17,310 - INFO - Get LATEST geckodriver version for 137.0 firefox
+2025-04-18 12:44:17,706 - INFO - Get LATEST geckodriver version for 137.0 firefox
+2025-04-18 12:44:17,706 - INFO - Get LATEST geckodriver version for 137.0 firefox
+2025-04-18 12:44:17,706 - INFO - Get LATEST geckodriver version for 137.0 firefox
+2025-04-18 12:44:17,948 - INFO - Driver [/home/analityk/.wdm/drivers/geckodriver/linux64/v0.36.0/geckodriver] found in cache
+2025-04-18 12:44:17,948 - INFO - Driver [/home/analityk/.wdm/drivers/geckodriver/linux64/v0.36.0/geckodriver] found in cache
+2025-04-18 12:44:17,948 - INFO - Driver [/home/analityk/.wdm/drivers/geckodriver/linux64/v0.36.0/geckodriver] found in cache
+2025-04-18 12:44:17,948 - ERROR - Ошибка при настройке веб-драйвера: WebDriver.__init__() got an unexpected keyword argument 'capabilities'
+2025-04-18 12:44:17,948 - ERROR - Ошибка при настройке веб-драйвера: WebDriver.__init__() got an unexpected keyword argument 'capabilities'
+2025-04-18 12:44:17,948 - ERROR - Ошибка при настройке веб-драйвера: WebDriver.__init__() got an unexpected keyword argument 'capabilities'
+2025-04-18 12:44:18,007 - INFO - 127.0.0.1 - - [18/Apr/2025 12:44:18] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 12:44:18,007 - INFO - 127.0.0.1 - - [18/Apr/2025 12:44:18] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 12:44:18,007 - INFO - 127.0.0.1 - - [18/Apr/2025 12:44:18] "GET /get_status HTTP/1.1" 200 
