@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import time
+import traceback
 from urllib.parse import urlparse, parse_qs
 import re
 import requests
@@ -393,6 +394,7 @@ class KindleAutoAPIScraper:
             logging.error(f"Ошибка при перехвате сетевого трафика: {str(e)}")
             return []
 
+    @log_function_call(parsing_logger)
     def extract_content_from_api_responses(self, api_responses):
         """
         Извлекает структурированный контент из перехваченных API-ответов
@@ -401,11 +403,14 @@ class KindleAutoAPIScraper:
         :return: True если удалось извлечь контент, иначе False
         """
         if not api_responses:
-            logging.warning("Нет перехваченных API-ответов для обработки")
+            parsing_logger.warning("Нет перехваченных API-ответов для обработки")
             return False
             
         try:
-            logging.info(f"Начинаем обработку {len(api_responses)} API-ответов")
+            # Сохраняем все API-ответы для детального анализа
+            log_parsed_content(api_responses, "raw_api_responses")
+            
+            parsing_logger.info(f"Начинаем обработку {len(api_responses)} API-ответов")
             
             # Создаем словарь для отслеживания номеров страниц
             page_content = {}
@@ -416,45 +421,84 @@ class KindleAutoAPIScraper:
             }
             
             # Обрабатываем каждый ответ
-            for response in api_responses:
+            for index, response in enumerate(api_responses):
                 url = response.get('url', '')
                 data = response.get('data', {})
                 
+                # Сохраняем ответ для детального анализа
+                log_parsed_content(response, f"api_response_{index}")
+                
                 # Пропускаем пустые ответы
                 if not data:
+                    parsing_logger.warning(f"Пропускаем пустой ответ API #{index} от URL: {url}")
                     continue
                     
-                logging.info(f"Обрабатываем ответ API: {url}")
+                parsing_logger.info(f"Обрабатываем ответ API #{index}: {url}")
                 
                 # Обработка различных типов API-ответов
                 
                 # Тип 1: Ответ с метаданными книги
                 if '/metadata' in url or '/lookup' in url:
+                    parsing_logger.debug(f"Определен тип ответа: МЕТАДАННЫЕ (URL: {url})")
                     if isinstance(data, dict):
                         if 'title' in data:
                             book_metadata['title'] = data['title']
+                            parsing_logger.info(f"Извлечено название книги: {data['title']}")
                         if 'author' in data:
                             book_metadata['author'] = data['author']
+                            parsing_logger.info(f"Извлечен автор книги: {data['author']}")
                         if 'asin' in data:
                             book_metadata['bookId'] = data['asin']
+                            parsing_logger.info(f"Извлечен ID книги: {data['asin']}")
                             
                 # Тип 2: Ответ с содержимым страницы
                 if '/content' in url or '/pages' in url:
+                    parsing_logger.debug(f"Определен тип ответа: СОДЕРЖИМОЕ СТРАНИЦЫ (URL: {url})")
+                    # Сохраняем данные для анализа структуры страницы
+                    log_parsed_content(data, f"content_response_{index}")
+                    
+                    # Проверяем структуру данных перед обработкой
+                    if isinstance(data, dict):
+                        parsing_logger.debug(f"Структура ответа: {list(data.keys())}")
+                    elif isinstance(data, list):
+                        parsing_logger.debug(f"Ответ представляет собой список из {len(data)} элементов")
+                    
                     self._process_content_response(data, page_content)
                     
                 # Тип 3: Ответ со структурой глав
                 if '/chapters' in url or '/toc' in url:
+                    parsing_logger.debug(f"Определен тип ответа: СТРУКТУРА ГЛАВ (URL: {url})")
+                    # Сохраняем данные для анализа структуры глав
+                    log_parsed_content(data, f"chapters_response_{index}")
                     self._process_chapters_response(data)
+            
+            # Сохраняем извлеченные метаданные для анализа
+            log_parsed_content(book_metadata, "extracted_metadata")
+            
+            # Сохраняем извлеченное содержимое страниц
+            log_parsed_content(page_content, "extracted_page_content")
                     
             # Формируем структурированный контент
             self._format_structured_content(book_metadata, page_content)
             
-            return len(page_content) > 0
+            # Сохраняем итоговую структуру контента
+            log_parsed_content(self.structured_content, "final_structured_content")
+            
+            # Проверяем, удалось ли извлечь контент
+            result = len(page_content) > 0
+            if result:
+                parsing_logger.info(f"Успешно извлечено содержимое {len(page_content)} страниц")
+            else:
+                parsing_logger.error("Не удалось извлечь контент из API-ответов")
+                
+            return result
             
         except Exception as e:
-            logging.error(f"Ошибка при извлечении контента из API-ответов: {str(e)}")
+            parsing_logger.error(f"Ошибка при извлечении контента из API-ответов: {str(e)}")
+            parsing_logger.error(f"Трассировка: {traceback.format_exc()}")
             return False
 
+    @log_function_call(parsing_logger)
     def _process_content_response(self, data, page_content):
         """
         Обрабатывает ответ API с содержимым страницы
@@ -464,36 +508,63 @@ class KindleAutoAPIScraper:
         """
         try:
             # Ищем текстовое содержимое в разных форматах API-ответов
+            parsing_logger.debug(f"Начинаем обработку содержимого страницы, тип данных: {type(data).__name__}")
             
             # Формат 1: Прямой ответ с содержимым
             if 'content' in data:
+                parsing_logger.debug("Обнаружен ключ 'content' в ответе")
                 content = data['content']
+                
                 if isinstance(content, list):
-                    for item in content:
+                    parsing_logger.debug(f"Содержимое представляет собой список из {len(content)} элементов")
+                    for index, item in enumerate(content):
                         if isinstance(item, dict) and 'pageNumber' in item and 'text' in item:
                             page_number = item['pageNumber']
                             text = item['text']
                             page_content[page_number] = text
+                            parsing_logger.debug(f"Извлечен текст для страницы {page_number} ({len(text)} символов)")
+                        else:
+                            parsing_logger.warning(f"Элемент #{index} не содержит необходимых полей: {item.keys() if isinstance(item, dict) else type(item).__name__}")
                             
                 elif isinstance(content, dict):
+                    parsing_logger.debug(f"Содержимое представляет собой словарь с ключами: {list(content.keys())}")
                     for page_number, text in content.items():
                         if isinstance(text, str):
                             page_content[page_number] = text
+                            parsing_logger.debug(f"Извлечен текст для страницы {page_number} ({len(text)} символов)")
+                        else:
+                            parsing_logger.warning(f"Значение для страницы {page_number} не является строкой: {type(text).__name__}")
+                else:
+                    parsing_logger.warning(f"Содержимое имеет неожиданный тип: {type(content).__name__}")
                             
             # Формат 2: Вложенная структура с содержимым
             elif 'result' in data and 'content' in data['result']:
+                parsing_logger.debug("Обнаружена вложенная структура 'result.content'")
                 content = data['result']['content']
+                
                 if isinstance(content, list):
-                    for item in content:
+                    parsing_logger.debug(f"Содержимое представляет собой список из {len(content)} элементов")
+                    for index, item in enumerate(content):
                         if isinstance(item, dict) and 'pageNumber' in item and 'text' in item:
                             page_number = item['pageNumber']
                             text = item['text']
                             page_content[page_number] = text
+                            parsing_logger.debug(f"Извлечен текст для страницы {page_number} ({len(text)} символов)")
+                        else:
+                            parsing_logger.warning(f"Элемент #{index} не содержит необходимых полей: {item.keys() if isinstance(item, dict) else type(item).__name__}")
+                else:
+                    parsing_logger.warning(f"Содержимое в 'result.content' имеет неожиданный тип: {type(content).__name__}")
                             
             # Формат 3: Содержимое в виде HTML
             elif 'html' in data or 'body' in data:
+                parsing_logger.debug("Обнаружен HTML-контент")
                 html_content = data.get('html', data.get('body', ''))
+                
                 if html_content:
+                    # Логируем фрагмент HTML для анализа
+                    sample = html_content[:200] + "..." if len(html_content) > 200 else html_content
+                    parsing_logger.debug(f"Образец HTML: {sample}")
+                    
                     # Примитивное извлечение текста из HTML
                     text = re.sub(r'<[^>]+>', ' ', html_content)
                     text = re.sub(r'\s+', ' ', text).strip()
@@ -501,9 +572,17 @@ class KindleAutoAPIScraper:
                     # Используем текущее количество страниц + 1
                     page_number = len(page_content) + 1
                     page_content[page_number] = text
+                    parsing_logger.debug(f"Извлечен текст из HTML для страницы {page_number} ({len(text)} символов)")
+            else:
+                # Не найдены известные структуры данных
+                parsing_logger.warning(f"Не обнаружена известная структура данных. Доступные ключи: {list(data.keys()) if isinstance(data, dict) else 'Не словарь'}")
+                
+            # Логируем результат обработки
+            parsing_logger.info(f"Извлечено {len(page_content)} страниц контента")
                     
         except Exception as e:
-            logging.error(f"Ошибка при обработке содержимого страницы: {str(e)}")
+            parsing_logger.error(f"Ошибка при обработке содержимого страницы: {str(e)}")
+            parsing_logger.error(f"Трассировка: {traceback.format_exc()}")
 
     def _process_chapters_response(self, data):
         """
@@ -514,6 +593,7 @@ class KindleAutoAPIScraper:
         # Реализация будет добавлена при необходимости
         pass
 
+    @log_function_call(parsing_logger)
     def _format_structured_content(self, metadata, page_content):
         """
         Форматирует извлеченный контент в структурированный формат
@@ -522,21 +602,35 @@ class KindleAutoAPIScraper:
         :param page_content: Словарь с содержимым страниц
         """
         try:
+            parsing_logger.debug(f"Начинаем форматирование структурированного контента. Метаданные: {metadata}")
+            parsing_logger.debug(f"Количество страниц с контентом: {len(page_content)}")
+            
             # Обновляем метаданные книги
             self.structured_content['result']['bookId'] = metadata['bookId']
             self.structured_content['result']['title'] = metadata['title']
             self.structured_content['result']['author'] = metadata['author']
             
+            # Логируем обновленные метаданные
+            parsing_logger.info(f"Обновлены метаданные книги: ID={metadata['bookId']}, Название='{metadata['title']}', Автор='{metadata['author']}'")
+            
             # Очищаем существующий контент
             self.structured_content['result']['content'] = []
             
             # Добавляем содержимое страниц в отсортированном порядке
-            for page_number in sorted(page_content.keys(), key=lambda x: int(x) if isinstance(x, str) and x.isdigit() else x):
+            page_keys = list(page_content.keys())
+            parsing_logger.debug(f"Номера страниц перед сортировкой: {page_keys}")
+            
+            # Сортируем номера страниц
+            sorted_keys = sorted(page_content.keys(), key=lambda x: int(x) if isinstance(x, str) and x.isdigit() else x)
+            parsing_logger.debug(f"Номера страниц после сортировки: {sorted_keys}")
+            
+            for page_number in sorted_keys:
                 text = page_content[page_number]
                 self.structured_content['result']['content'].append({
                     'pageNumber': page_number,
                     'text': text
                 })
+                parsing_logger.debug(f"Добавлена страница {page_number} с текстом ({len(text)} символов)")
                 
             # Обновляем общее количество страниц
             self.total_pages = len(self.structured_content['result']['content'])
@@ -548,11 +642,18 @@ class KindleAutoAPIScraper:
                 self.extracted_text += item['text']
                 self.extracted_text += "\n\n"
                 
-            logging.info(f"Структурированный контент сформирован. Извлечено {self.total_pages} страниц.")
+            # Сохраняем образец извлеченного текста для анализа
+            text_sample = self.extracted_text[:500] + "..." if len(self.extracted_text) > 500 else self.extracted_text
+            parsing_logger.debug(f"Образец извлеченного текста: {text_sample}")
+            
+            parsing_logger.info(f"Структурированный контент сформирован. Извлечено {self.total_pages} страниц.")
+            parsing_logger.info(f"Общий размер извлеченного текста: {len(self.extracted_text)} символов")
             
         except Exception as e:
-            logging.error(f"Ошибка при форматировании структурированного контента: {str(e)}")
+            parsing_logger.error(f"Ошибка при форматировании структурированного контента: {str(e)}")
+            parsing_logger.error(f"Трассировка: {traceback.format_exc()}")
 
+    @log_function_call(parsing_logger)
     def save_text(self):
         """
         Сохраняет извлеченный текст в файл
@@ -561,20 +662,25 @@ class KindleAutoAPIScraper:
         """
         try:
             if not self.extracted_text:
-                logging.warning("Нет текстового содержимого для сохранения")
+                parsing_logger.warning("Нет текстового содержимого для сохранения")
                 return False
+            
+            parsing_logger.info(f"Сохраняем извлеченный текст в файл: {self.output_file}")
+            parsing_logger.debug(f"Размер текста: {len(self.extracted_text)} символов")
                 
             # Сохраняем текст в файл
             with open(self.output_file, 'w', encoding='utf-8') as f:
                 f.write(self.extracted_text)
                 
-            logging.info(f"Текст успешно сохранен в файл: {self.output_file}")
+            parsing_logger.info(f"Текст успешно сохранен в файл: {self.output_file}")
             return True
             
         except Exception as e:
-            logging.error(f"Ошибка при сохранении текста: {str(e)}")
+            parsing_logger.error(f"Ошибка при сохранении текста: {str(e)}")
+            parsing_logger.error(f"Трассировка: {traceback.format_exc()}")
             return False
 
+    @log_function_call(parsing_logger)
     def save_structured_content(self):
         """
         Сохраняет структурированный JSON с извлеченным контентом книги
@@ -583,35 +689,57 @@ class KindleAutoAPIScraper:
         """
         try:
             if not self.structured_content['result']['content']:
-                logging.warning("Нет структурированного содержимого для сохранения")
+                parsing_logger.warning("Нет структурированного содержимого для сохранения")
                 return False
-                
+            
             # Формируем имя файла JSON
             json_file = self.output_file.replace('.txt', '.json')
+            parsing_logger.info(f"Сохраняем структурированный контент в файл: {json_file}")
+            
+            # Логируем статистику контента
+            content_stats = {
+                "total_pages": len(self.structured_content['result']['content']),
+                "title_length": len(self.structured_content['result']['title']),
+                "author_length": len(self.structured_content['result']['author']),
+                "bookId": self.structured_content['result']['bookId']
+            }
+            parsing_logger.debug(f"Статистика контента: {content_stats}")
             
             # Сохраняем JSON в файл
             with open(json_file, 'w', encoding='utf-8') as f:
                 json.dump(self.structured_content, f, ensure_ascii=False, indent=2)
                 
-            logging.info(f"Структурированный контент успешно сохранен в файл: {json_file}")
+            parsing_logger.info(f"Структурированный контент успешно сохранен в файл: {json_file}")
             return True
             
         except Exception as e:
-            logging.error(f"Ошибка при сохранении структурированного контента: {str(e)}")
+            parsing_logger.error(f"Ошибка при сохранении структурированного контента: {str(e)}")
+            parsing_logger.error(f"Трассировка: {traceback.format_exc()}")
             return False
 
+    @log_function_call(selenium_logger)
     def cleanup(self):
         """
         Очистка ресурсов и закрытие драйвера
         """
         try:
             if self.driver:
-                logging.info("Закрываем браузер")
+                selenium_logger.info("Закрываем браузер")
+                
+                # Сохраняем финальный скриншот для отладки
+                try:
+                    log_screenshot(self.driver, "final_state_before_quit")
+                except Exception as screenshot_err:
+                    selenium_logger.warning(f"Не удалось сохранить финальный скриншот: {str(screenshot_err)}")
+                
                 self.driver.quit()
+                selenium_logger.info("Браузер успешно закрыт")
                 
         except Exception as e:
-            logging.error(f"Ошибка при закрытии браузера: {str(e)}")
+            selenium_logger.error(f"Ошибка при закрытии браузера: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
 
+    @log_function_call(selenium_logger)
     def run(self):
         """
         Запускает весь процесс извлечения
@@ -619,65 +747,146 @@ class KindleAutoAPIScraper:
         :return: True если успешно, иначе False
         """
         try:
+            selenium_logger.info("Запускаем процесс извлечения книги")
+            selenium_logger.info(f"URL книги: {self.book_url}")
+            selenium_logger.info(f"ASIN книги: {self.asin}")
+            
             # Настраиваем веб-драйвер
+            selenium_logger.info("Настраиваем веб-драйвер")
             if not self.setup_driver():
+                selenium_logger.error("Не удалось настроить веб-драйвер")
                 return False
                 
             # Открываем Kindle Cloud Reader
+            selenium_logger.info("Открываем Kindle Cloud Reader")
             if not self.open_kindle_cloud_reader():
+                selenium_logger.error("Не удалось открыть Kindle Cloud Reader")
                 self.cleanup()
                 return False
                 
             # Открываем книгу
+            selenium_logger.info(f"Открываем книгу, ASIN: {self.asin}")
             if not self.open_book():
+                selenium_logger.error(f"Не удалось открыть книгу, ASIN: {self.asin}")
                 self.cleanup()
                 return False
                 
             # Перехватываем сетевой трафик
+            selenium_logger.info("Перехватываем сетевой трафик")
             api_responses = self.capture_network_traffic()
+            selenium_logger.info(f"Перехвачено {len(api_responses) if api_responses else 0} API-ответов")
             
             # Извлекаем контент из API-ответов
+            parsing_logger.info("Извлекаем контент из API-ответов")
             if not self.extract_content_from_api_responses(api_responses):
-                logging.warning("Не удалось извлечь контент из API-ответов")
+                parsing_logger.warning("Не удалось извлечь контент из API-ответов")
                 
                 # Если не удалось извлечь контент, пробуем получить текст напрямую со страницы
-                logging.info("Пытаемся извлечь текст напрямую со страницы")
+                selenium_logger.info("Пытаемся извлечь текст напрямую со страницы")
                 
                 # Переключаемся на окно с книгой
-                self.driver.switch_to.window(self.driver.window_handles[0])
-                
-                # Извлекаем текст
-                text_elements = self.driver.find_elements(By.CSS_SELECTOR, ".kindleReader-content")
-                if text_elements:
-                    self.extracted_text = "\n\n".join([el.text for el in text_elements if el.text])
+                try:
+                    selenium_logger.debug(f"Доступные окна: {len(self.driver.window_handles)}")
+                    self.driver.switch_to.window(self.driver.window_handles[0])
                     
-                    # Формируем примитивный структурированный контент
-                    self.structured_content['result']['content'] = [{
-                        'pageNumber': 1,
-                        'text': self.extracted_text
-                    }]
+                    # Логируем состояние страницы для отладки
+                    log_screenshot(self.driver, "before_direct_extraction")
+                    log_page_content(self.driver, "before_direct_extraction")
                     
-                    self.total_pages = 1
+                    # Извлекаем текст
+                    selenium_logger.debug("Ищем элементы контента на странице")
+                    text_elements = self.driver.find_elements(By.CSS_SELECTOR, ".kindleReader-content")
+                    selenium_logger.debug(f"Найдено {len(text_elements)} элементов контента")
                     
-                    logging.info("Текст успешно извлечен напрямую со страницы")
-                else:
-                    logging.error("Не удалось извлечь текст со страницы")
+                    if text_elements:
+                        extracted_texts = [el.text for el in text_elements if el.text]
+                        self.extracted_text = "\n\n".join(extracted_texts)
+                        selenium_logger.info(f"Извлечен текст ({len(self.extracted_text)} символов)")
+                        
+                        # Формируем примитивный структурированный контент
+                        self.structured_content['result']['content'] = [{
+                            'pageNumber': 1,
+                            'text': self.extracted_text
+                        }]
+                        
+                        self.total_pages = 1
+                        
+                        parsing_logger.info(f"Текст успешно извлечен напрямую со страницы: {len(self.extracted_text)} символов")
+                    else:
+                        selenium_logger.error("Не удалось найти элементы контента на странице")
+                        
+                        # Пробуем альтернативные селекторы
+                        alternative_selectors = [
+                            ".kindle-book-content", 
+                            "#kindleReader-content", 
+                            ".bookContent",
+                            "#book-content"
+                        ]
+                        
+                        for selector in alternative_selectors:
+                            selenium_logger.debug(f"Пробуем альтернативный селектор: {selector}")
+                            alt_elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
+                            if alt_elements:
+                                selenium_logger.info(f"Найдены элементы с селектором {selector}: {len(alt_elements)}")
+                                self.extracted_text = "\n\n".join([el.text for el in alt_elements if el.text])
+                                if self.extracted_text:
+                                    selenium_logger.info(f"Извлечен текст с помощью селектора {selector}: {len(self.extracted_text)} символов")
+                                    
+                                    # Формируем примитивный структурированный контент
+                                    self.structured_content['result']['content'] = [{
+                                        'pageNumber': 1,
+                                        'text': self.extracted_text
+                                    }]
+                                    
+                                    self.total_pages = 1
+                                    break
+                        
+                        if not self.extracted_text:
+                            # Если все попытки не удались, попробуем извлечь весь текст страницы
+                            selenium_logger.debug("Пробуем извлечь весь текст страницы")
+                            body_text = self.driver.find_element(By.TAG_NAME, "body").text
+                            if body_text:
+                                self.extracted_text = body_text
+                                selenium_logger.info(f"Извлечен текст страницы: {len(self.extracted_text)} символов")
+                                
+                                # Формируем примитивный структурированный контент
+                                self.structured_content['result']['content'] = [{
+                                    'pageNumber': 1,
+                                    'text': self.extracted_text
+                                }]
+                                
+                                self.total_pages = 1
+                            else:
+                                selenium_logger.error("Не удалось извлечь текст со страницы")
+                                # Сохраняем скриншот для отладки
+                                log_screenshot(self.driver, "extraction_failure")
+                                self.cleanup()
+                                return False
+                                
+                except Exception as extraction_err:
+                    selenium_logger.error(f"Ошибка при прямом извлечении текста: {str(extraction_err)}")
+                    selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
                     self.cleanup()
                     return False
                     
             # Сохраняем извлеченный текст
+            parsing_logger.info("Сохраняем извлеченный текст")
             self.save_text()
             
             # Сохраняем структурированный контент
+            parsing_logger.info("Сохраняем структурированный контент")
             self.save_structured_content()
             
             # Очищаем ресурсы
+            selenium_logger.info("Очищаем ресурсы")
             self.cleanup()
             
+            selenium_logger.info("Процесс извлечения успешно завершен")
             return True
             
         except Exception as e:
-            logging.error(f"Ошибка при запуске процесса извлечения: {str(e)}")
+            selenium_logger.error(f"Ошибка при запуске процесса извлечения: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
             self.cleanup()
             return False
 
