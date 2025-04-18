@@ -25,25 +25,11 @@
                             <input type="hidden" name="method" value="api">
                             <div class="mb-3">
                                 <p class="alert alert-success">
-                                    <strong>Доступно две возможности:</strong>
-                                    <ul>
-                                        <li><strong>Использовать предопределенный файл</strong> - быстрый способ получить текст из примера ответа API.</li>
-                                        <li><strong>Использовать автоматизированный браузер Chrome</strong> - современный метод с поддержкой авторизации и извлечения изображений.</li>
-                                    </ul>
+                                    <strong>Автоматизированный API парсер:</strong> Парсер запустит Chrome браузер, автоматически выполнит вход в Amazon и извлечет текст и все изображения из книги.
                                 </p>
                             </div>
                             
-                            <div class="mb-3">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" id="useResponseFile" name="useResponseFile" checked>
-                                    <label class="form-check-label" for="useResponseFile">Использовать предопределенный файл</label>
-                                </div>
-                                <div id="predefinedFileInfo" class="alert alert-info">
-                                    <strong>Информация:</strong> Будет использован предопределенный пример ответа API для книги "Quantum Poker".
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3" id="directApiFieldsContainer" style="display: none;">
+                            <div class="mb-3" id="directApiFieldsContainer">
                                 <div class="alert alert-primary">
                                     <strong>Автоматизированный режим:</strong> Будет запущен локальный Chrome браузер, который выполнит авторизацию и извлечет текст и изображения из книги.
                                 </div>
@@ -89,7 +75,7 @@
                             <div class="mb-3">
                                 <label for="output_file" class="form-label">Имя файла для сохранения</label>
                                 <input type="text" class="form-control" id="output_file" name="output_file" value="kindle_api_book.txt" required>
-                                <div class="form-text">Результат также будет сохранен в JSON формате в файле с расширением .json</div>
+                                <div class="form-text">Результат будет сохранен в текстовом файле</div>
                             </div>
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-primary" id="startButton">Запустить API парсер</button>
@@ -154,37 +140,26 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">Инструкция по использованию API парсера</h2>
+                        <h2 class="card-title">Информация о API парсере</h2>
                     </div>
                     <div class="card-body">
-                        <h3>Как получить API ответы от Kindle Cloud Reader:</h3>
-                        <ol>
-                            <li>Откройте Kindle Cloud Reader в браузере (<a href="https://read.amazon.com" target="_blank">https://read.amazon.com</a>)</li>
-                            <li>Войдите в свой аккаунт Amazon</li>
-                            <li>Откройте инструменты разработчика (F12 или Ctrl+Shift+I в Chrome/Firefox)</li>
-                            <li>Перейдите на вкладку Network (Сеть)</li>
-                            <li>Откройте книгу и перелистайте несколько страниц</li>
-                            <li>В списке запросов ищите те, которые содержат в URL "getFileToken", "content" или "reader"</li>
-                            <li>Щелкните правой кнопкой мыши на нужном запросе и выберите "Copy Response" или "Save Response As..."</li>
-                            <li>Сохраните ответ в файл с расширением .json</li>
-                        </ol>
-                        
-                        <div class="alert alert-info">
-                            <strong>Совет:</strong> 
-                            <p>Вы также можете сохранить весь сетевой трафик в формате HAR:</p>
-                            <ol>
-                                <li>На вкладке Network нажмите правой кнопкой мыши и выберите "Save all as HAR"</li>
-                                <li>Сохраните файл с расширением .har</li>
-                                <li>Используйте этот файл для извлечения всех API URL и их содержимого</li>
-                            </ol>
+                        <div class="alert alert-primary">
+                            <h4>Ключевые возможности парсера:</h4>
+                            <ul>
+                                <li><strong>Автоматическая авторизация</strong> - парсер сам войдет в вашу учетную запись Amazon</li>
+                                <li><strong>Извлечение текста</strong> - получение текста книги в структурированном формате</li>
+                                <li><strong>Извлечение изображений</strong> - сохранение всех изображений книги в выбранную директорию</li>
+                                <li><strong>Автоматическая пагинация</strong> - автоматический переход по страницам книги</li>
+                            </ul>
                         </div>
                         
                         <div class="alert alert-warning">
-                            <strong>Важно:</strong> 
+                            <strong>Важная информация:</strong> 
                             <ul>
-                                <li>Этот метод более эффективен, так как не требует автоматизации браузера</li>
-                                <li>Структура ответов API может меняться, поэтому может потребоваться настройка скрипта</li>
-                                <li>Используйте этот метод только для книг, которые вы приобрели легально</li>
+                                <li>Парсер запускает локальный браузер Chrome и автоматизирует процесс чтения</li>
+                                <li>Учетные данные необходимы для получения доступа к вашим легально приобретенным книгам</li>
+                                <li>Эффективность парсера зависит от скорости соединения и производительности компьютера</li>
+                                <li>Использовать только для книг, которые вы приобрели легально</li>
                             </ul>
                         </div>
                     </div>
@@ -213,10 +188,6 @@
             let isRunning = false;
             let statusInterval = null;
             
-            // Обработчик переключения между предопределенным файлом и прямым API
-            const useResponseFileCheckbox = document.getElementById('useResponseFile');
-            const directApiFieldsContainer = document.getElementById('directApiFieldsContainer');
-            const predefinedFileInfo = document.getElementById('predefinedFileInfo');
             const extractImagesCheckbox = document.getElementById('extract_images');
             const imagesOptionsContainer = document.getElementById('imagesOptions');
             
@@ -229,24 +200,8 @@
                 }
             });
             
-            // Обработчик переключения между предопределенным файлом и автоматизированным режимом
-            useResponseFileCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    // Если выбран предопределенный файл
-                    directApiFieldsContainer.style.display = 'none';
-                    predefinedFileInfo.style.display = 'block';
-                    
-                    // Меняем value поля метода
-                    document.querySelector('input[name="method"]').value = 'api';
-                } else {
-                    // Если выбран автоматизированный режим
-                    directApiFieldsContainer.style.display = 'block';
-                    predefinedFileInfo.style.display = 'none';
-                    
-                    // Меняем value поля метода на enhanced_api
-                    document.querySelector('input[name="method"]').value = 'enhanced_api';
-                }
-            });
+            // Устанавливаем режим enhanced_api по умолчанию
+            document.querySelector('input[name="method"]').value = 'enhanced_api';
             
             // Функция обновления статуса
             function updateStatus() {
