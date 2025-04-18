@@ -25,13 +25,31 @@
                             <input type="hidden" name="method" value="api">
                             <div class="mb-3">
                                 <p class="alert alert-info">
-                                    В этом тестовом режиме мы используем предварительно сохраненный файл JSON с данными Kindle. <br>
-                                    В реальном использовании вы должны сохранить ответ API из вкладки Network в инструментах разработчика браузера.
+                                    API-парсер позволяет извлекать текст книги напрямую из Kindle Cloud Reader через API-запросы.
+                                    Введите URL книги и учетные данные Amazon для автоматической авторизации.
                                 </p>
                             </div>
                             <div class="mb-3">
+                                <label for="book_url" class="form-label">URL книги в Kindle Cloud Reader</label>
+                                <input type="url" class="form-control" id="book_url" name="book_url" placeholder="https://read.amazon.com/...">
+                                <div class="form-text">Например: https://read.amazon.com/?asin=B009SE1Z9E</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email для входа в Amazon</label>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="your.email@example.com">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Пароль для входа в Amazon</label>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Ваш пароль">
+                                <div class="form-text">Учетные данные необходимы для авторизации и доступа к API</div>
+                            </div>
+                            
+                            <div class="mb-3">
                                 <label for="output_file" class="form-label">Имя файла для сохранения</label>
                                 <input type="text" class="form-control" id="output_file" name="output_file" value="kindle_api_book.txt" required>
+                                <div class="form-text">Результат также будет сохранен в JSON формате в файле с расширением .json</div>
                             </div>
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-primary" id="startButton">Запустить API парсер</button>
