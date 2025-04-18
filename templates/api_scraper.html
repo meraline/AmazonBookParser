@@ -3,63 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kindle Cloud Reader Scraper</title>
+    <title>Kindle API Scraper</title>
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body data-bs-theme="dark">
     <div class="container py-4">
         <header class="pb-3 mb-4 border-bottom">
-            <h1 class="display-5 fw-bold">Парсер Kindle Cloud Reader</h1>
-            <p class="lead">Извлечение текста книги из Kindle Cloud Reader</p>
+            <h1 class="display-5 fw-bold">Парсер Kindle API</h1>
+            <p class="lead">Извлечение текста книги из API ответов Kindle Cloud Reader</p>
         </header>
 
         <div class="row">
             <div class="col-md-6">
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h2 class="card-title">Настройки Selenium парсера</h2>
+                        <h2 class="card-title">Настройки API парсера</h2>
                     </div>
                     <div class="card-body">
-                        <form id="scraperForm">
-                            <input type="hidden" name="method" value="selenium">
+                        <form id="apiScraperForm">
+                            <input type="hidden" name="method" value="api">
                             <div class="mb-3">
-                                <label for="email" class="form-label">Email Amazon</label>
-                                <input type="email" class="form-control" id="email" name="email" value="meraline7@gmail.com" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Пароль Amazon</label>
-                                <input type="password" class="form-control" id="password" name="password" value="uYX-8q3-J6u-j8v" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="book_url" class="form-label">URL книги</label>
-                                <input type="url" class="form-control" id="book_url" name="book_url" 
-                                       value="https://read.amazon.com/?x-client-id=ads-store&_encoding=UTF8&asin=B009SE1Z9E&consumptionLimitReached=false&hasMultimedia=false&requiredCapabilities=EBOK_PURCHASE_ALLOWED&ref_=ast_author_rff" required>
+                                <p class="alert alert-info">
+                                    В этом тестовом режиме мы используем предварительно сохраненный файл JSON с данными Kindle. <br>
+                                    В реальном использовании вы должны сохранить ответ API из вкладки Network в инструментах разработчика браузера.
+                                </p>
                             </div>
                             <div class="mb-3">
                                 <label for="output_file" class="form-label">Имя файла для сохранения</label>
-                                <input type="text" class="form-control" id="output_file" name="output_file" value="kindle_book.txt" required>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="pages_to_read" class="form-label">Количество страниц</label>
-                                        <input type="number" class="form-control" id="pages_to_read" name="pages_to_read" value="100" min="1" max="1000" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="page_load_time" class="form-label">Задержка между страницами (сек)</label>
-                                        <input type="number" class="form-control" id="page_load_time" name="page_load_time" value="3" min="1" max="10" step="0.5" required>
-                                    </div>
-                                </div>
+                                <input type="text" class="form-control" id="output_file" name="output_file" value="kindle_api_book.txt" required>
                             </div>
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary" id="startButton">Запустить Selenium парсер</button>
+                                <button type="submit" class="btn btn-primary" id="startButton">Запустить API парсер</button>
                                 <button type="button" class="btn btn-danger" id="stopButton" disabled>Остановить</button>
-                                <a href="/test_api_scraper" class="btn btn-info">Перейти к API парсеру</a>
                             </div>
                         </form>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h2 class="card-title">Навигация</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/" class="btn btn-secondary">Перейти к Selenium парсеру</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -80,7 +69,7 @@
                             </div>
                             
                             <div class="mb-3">
-                                <p>Страница: <span id="currentPage">0</span> из <span id="totalPages">0</span></p>
+                                <p>Обработка: <span id="currentPage">0</span> из <span id="totalPages">0</span></p>
                             </div>
                         </div>
                     </div>
@@ -104,23 +93,37 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">Инструкция</h2>
+                        <h2 class="card-title">Инструкция по использованию API парсера</h2>
                     </div>
                     <div class="card-body">
+                        <h3>Как получить API ответы от Kindle Cloud Reader:</h3>
                         <ol>
-                            <li>Введите свой email и пароль от аккаунта Amazon</li>
-                            <li>Укажите URL книги из Kindle Cloud Reader</li>
-                            <li>Настройте количество страниц для извлечения и задержку между страницами</li>
-                            <li>Нажмите "Запустить парсер" и дождитесь завершения процесса</li>
-                            <li>Результат будет сохранен в указанный файл</li>
+                            <li>Откройте Kindle Cloud Reader в браузере (<a href="https://read.amazon.com" target="_blank">https://read.amazon.com</a>)</li>
+                            <li>Войдите в свой аккаунт Amazon</li>
+                            <li>Откройте инструменты разработчика (F12 или Ctrl+Shift+I в Chrome/Firefox)</li>
+                            <li>Перейдите на вкладку Network (Сеть)</li>
+                            <li>Откройте книгу и перелистайте несколько страниц</li>
+                            <li>В списке запросов ищите те, которые содержат в URL "getFileToken", "content" или "reader"</li>
+                            <li>Щелкните правой кнопкой мыши на нужном запросе и выберите "Copy Response" или "Save Response As..."</li>
+                            <li>Сохраните ответ в файл с расширением .json</li>
                         </ol>
+                        
+                        <div class="alert alert-info">
+                            <strong>Совет:</strong> 
+                            <p>Вы также можете сохранить весь сетевой трафик в формате HAR:</p>
+                            <ol>
+                                <li>На вкладке Network нажмите правой кнопкой мыши и выберите "Save all as HAR"</li>
+                                <li>Сохраните файл с расширением .har</li>
+                                <li>Используйте этот файл для извлечения всех API URL и их содержимого</li>
+                            </ol>
+                        </div>
                         
                         <div class="alert alert-warning">
                             <strong>Важно:</strong> 
                             <ul>
-                                <li>Процесс может занять продолжительное время в зависимости от количества страниц и настроенной задержки</li>
-                                <li>Не закрывайте это окно до завершения процесса</li>
-                                <li>Если процесс прерывается, попробуйте увеличить задержку между страницами</li>
+                                <li>Этот метод более эффективен, так как не требует автоматизации браузера</li>
+                                <li>Структура ответов API может меняться, поэтому может потребоваться настройка скрипта</li>
+                                <li>Используйте этот метод только для книг, которые вы приобрели легально</li>
                             </ul>
                         </div>
                     </div>
@@ -129,13 +132,13 @@
         </div>
         
         <footer class="pt-3 mt-4 text-muted border-top">
-            &copy; 2023 Kindle Cloud Reader Scraper
+            &copy; 2023 Kindle API Scraper
         </footer>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const scraperForm = document.getElementById('scraperForm');
+            const apiScraperForm = document.getElementById('apiScraperForm');
             const startButton = document.getElementById('startButton');
             const stopButton = document.getElementById('stopButton');
             const statusMessage = document.getElementById('statusMessage');
@@ -204,10 +207,10 @@
             }
             
             // Обработчик отправки формы
-            scraperForm.addEventListener('submit', function(event) {
+            apiScraperForm.addEventListener('submit', function(event) {
                 event.preventDefault();
                 
-                const formData = new FormData(scraperForm);
+                const formData = new FormData(apiScraperForm);
                 
                 fetch('/start_scraping', {
                     method: 'POST',

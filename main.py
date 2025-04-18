@@ -3,7 +3,9 @@ import os
 import threading
 import time
 import logging
+import json
 from kindle_scraper import KindleScraper
+from kindle_api_scraper import KindleAPIScraper
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
@@ -152,10 +154,45 @@ def run_scraper(email, password, book_url, output_file, pages_to_read, page_load
         scraper_status["running"] = False
 
 
+def run_api_scraper(response_file, output_file):
+    """Функция для запуска API скрапера в отдельном потоке"""
+    try:
+        scraper_status["running"] = True
+        scraper_status["progress"] = 0
+        scraper_status["total_pages"] = 1  # Одна операция извлечения
+        scraper_status["current_page"] = 0
+        scraper_status["log_messages"] = []
+        
+        log_handler("Запуск процесса извлечения текста через API")
+        
+        # Создаем экземпляр API скрапера
+        scraper = KindleAPIScraper(output_file=output_file)
+        
+        # Запускаем извлечение
+        log_handler(f"Начало обработки файла: {response_file}")
+        
+        success = scraper.run(response_file=response_file)
+        
+        if success:
+            scraper_status["progress"] = 100
+            log_handler(f"Текст успешно извлечен и сохранен в файл: {output_file}")
+        else:
+            log_handler("Ошибка при извлечении текста из API ответа")
+        
+    except Exception as e:
+        log_handler(f"Ошибка в процессе обработки API: {str(e)}")
+    finally:
+        scraper_status["running"] = False
+
 @app.route('/')
 def index():
     """Главная страница"""
     return render_template('index.html')
+
+@app.route('/test_api_scraper')
+def test_api_scraper():
+    """Тестовая страница для API скрапера"""
+    return render_template('api_scraper.html')
 
 @app.route('/start_scraping', methods=['POST'])
 def start_scraping():
@@ -164,26 +201,45 @@ def start_scraping():
         return jsonify({"status": "error", "message": "Процесс уже запущен"})
     
     # Получаем параметры из формы
-    email = request.form.get('email', '')
-    password = request.form.get('password', '')
-    book_url = request.form.get('book_url', '')
-    output_file = request.form.get('output_file', 'kindle_book.txt')
+    method = request.form.get('method', 'selenium')
     
-    try:
-        pages_to_read = int(request.form.get('pages_to_read', 50))
-        page_load_time = float(request.form.get('page_load_time', 3))
-    except ValueError:
-        return jsonify({"status": "error", "message": "Неверный формат числа страниц или времени загрузки"})
+    if method == 'selenium':
+        # Получаем параметры для Selenium скрапера
+        email = request.form.get('email', '')
+        password = request.form.get('password', '')
+        book_url = request.form.get('book_url', '')
+        output_file = request.form.get('output_file', 'kindle_book.txt')
+        
+        try:
+            pages_to_read = int(request.form.get('pages_to_read', 50))
+            page_load_time = float(request.form.get('page_load_time', 3))
+        except ValueError:
+            return jsonify({"status": "error", "message": "Неверный формат числа страниц или времени загрузки"})
+        
+        # Проверяем наличие всех необходимых параметров
+        if not email or not password or not book_url:
+            return jsonify({"status": "error", "message": "Не указаны все необходимые параметры"})
+        
+        # Запускаем скрапер в отдельном потоке
+        threading.Thread(
+            target=run_scraper, 
+            args=(email, password, book_url, output_file, pages_to_read, page_load_time)
+        ).start()
     
-    # Проверяем наличие всех необходимых параметров
-    if not email or not password or not book_url:
-        return jsonify({"status": "error", "message": "Не указаны все необходимые параметры"})
+    elif method == 'api':
+        # Получаем параметры для API скрапера
+        # В нашем тестовом случае используем предопределенный файл
+        response_file = 'sample_kindle_response.json'
+        output_file = request.form.get('output_file', 'kindle_api_book.txt')
+        
+        # Запускаем API скрапер в отдельном потоке
+        threading.Thread(
+            target=run_api_scraper,
+            args=(response_file, output_file)
+        ).start()
     
-    # Запускаем скрапер в отдельном потоке
-    threading.Thread(
-        target=run_scraper, 
-        args=(email, password, book_url, output_file, pages_to_read, page_load_time)
-    ).start()
+    else:
+        return jsonify({"status": "error", "message": "Неверный метод скрапинга"})
     
     return jsonify({"status": "success", "message": "Процесс запущен"})
 
