@@ -200,7 +200,7 @@ def test_web_scraper():
     """Тестовая страница для веб-скрапера"""
     return render_template('web_scraper.html')
 
-def run_web_scraper(book_url, output_file, page_count=50, auto_paginate=True):
+def run_web_scraper(book_url, output_file, email=None, password=None, page_count=50, auto_paginate=True):
     """Функция для запуска веб-скрапера в отдельном потоке"""
     try:
         scraper_status["running"] = True
@@ -213,10 +213,12 @@ def run_web_scraper(book_url, output_file, page_count=50, auto_paginate=True):
         
         log_handler("Запуск процесса извлечения текста через веб-парсер")
         
-        # Создаем экземпляр веб-скрапера с параметрами пагинации
+        # Создаем экземпляр веб-скрапера с параметрами пагинации и учетными данными
         scraper = KindleWebScraper(
             book_url=book_url, 
             output_file=output_file,
+            email=email,
+            password=password,
             page_count=page_count,
             auto_paginate=auto_paginate
         )
@@ -225,6 +227,13 @@ def run_web_scraper(book_url, output_file, page_count=50, auto_paginate=True):
         log_handler(f"Попытка извлечения текста из URL: {book_url}")
         log_handler(f"Режим автоматической пагинации: {'включен' if auto_paginate else 'выключен'}")
         log_handler(f"Запланировано страниц для обработки: {page_count}")
+        
+        # Сообщаем о статусе авторизации
+        if email and password:
+            log_handler("Предоставлены учетные данные для авторизации, будет выполнен автоматический вход")
+        else:
+            log_handler("Учетные данные не предоставлены, авторизация не будет выполнена")
+            
         scraper_status["progress"] = 5
         
         # Пробуем получить ASIN книги
@@ -309,6 +318,8 @@ def start_scraping():
         # Получаем параметры для веб-скрапера
         book_url = request.form.get('book_url', '')
         output_file = request.form.get('output_file', 'kindle_web_book.txt')
+        email = request.form.get('email', '')
+        password = request.form.get('password', '')
         
         # Проверяем наличие URL
         if not book_url:
@@ -321,10 +332,10 @@ def start_scraping():
         except ValueError:
             return jsonify({"status": "error", "message": "Неверный формат параметров пагинации"})
         
-        # Запускаем веб-скрапер в отдельном потоке с параметрами пагинации
+        # Запускаем веб-скрапер в отдельном потоке с параметрами пагинации и учетными данными
         threading.Thread(
             target=run_web_scraper,
-            args=(book_url, output_file, page_count, auto_paginate)
+            args=(book_url, output_file, email, password, page_count, auto_paginate)
         ).start()
     
     else:

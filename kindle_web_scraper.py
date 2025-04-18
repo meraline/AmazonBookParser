@@ -12,18 +12,22 @@ logging.basicConfig(filename='kindle_web_scraper.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 class KindleWebScraper:
-    def __init__(self, book_url=None, output_file="kindle_book.txt", session_cookies=None, page_count=50, auto_paginate=True):
+    def __init__(self, book_url=None, output_file="kindle_book.txt", email=None, password=None, session_cookies=None, page_count=50, auto_paginate=True):
         """
         Инициализация веб-скрапера для Kindle Cloud Reader
         
         :param book_url: URL книги в Kindle Cloud Reader
         :param output_file: Имя файла для сохранения текста
+        :param email: Email для входа в Amazon
+        :param password: Пароль для входа в Amazon
         :param session_cookies: Cookies для авторизации (опционально)
         :param page_count: Количество страниц для чтения (при автоматической пагинации)
         :param auto_paginate: Включение автоматической пагинации
         """
         self.book_url = book_url
         self.output_file = output_file
+        self.email = email
+        self.password = password
         self.session_cookies = session_cookies or {}
         self.session = requests.Session()
         self.page_count = page_count
@@ -31,6 +35,7 @@ class KindleWebScraper:
         self.current_page = 0
         self.current_page_callback = None
         self.stop_requested = False
+        self.is_authenticated = False
         
         # Устанавливаем заголовки для имитации браузера
         self.headers = {
@@ -41,7 +46,7 @@ class KindleWebScraper:
             'Origin': 'https://read.amazon.com',
         }
         
-        # Добавляем cookies в сессию
+        # Добавляем cookies в сессию, если они предоставлены
         for cookie_name, cookie_value in self.session_cookies.items():
             self.session.cookies.set(cookie_name, cookie_value)
         
@@ -269,6 +274,93 @@ class KindleWebScraper:
             logging.error(f"Error during pagination: {e}")
             return False
     
+    def authenticate(self):
+        """
+        Авторизация на сайте Amazon
+        
+        :return: True если авторизация прошла успешно, иначе False
+        """
+        if self.is_authenticated:
+            return True
+            
+        if not self.email or not self.password:
+            logging.warning("No credentials provided for authentication")
+            return False
+            
+        try:
+            logging.info("Attempting to authenticate with Amazon")
+            
+            # Открываем страницу входа
+            login_url = "https://www.amazon.com/ap/signin"
+            response = self.session.get(login_url, headers=self.headers)
+            
+            if response.status_code != 200:
+                logging.error(f"Failed to load login page, status code: {response.status_code}")
+                return False
+                
+            # Извлекаем формы и скрытые поля
+            soup = BeautifulSoup(response.text, 'html.parser')
+            form = soup.find('form', {'name': 'signIn'})
+            
+            if not form:
+                logging.error("Login form not found")
+                return False
+                
+            # Получаем URL для отправки формы
+            post_url = form.get('action')
+            if not post_url:
+                post_url = "https://www.amazon.com/ap/signin"
+            elif not post_url.startswith('http'):
+                post_url = f"https://www.amazon.com{post_url}"
+                
+            # Собираем все скрытые поля
+            form_data = {}
+            for input_field in form.find_all('input'):
+                name = input_field.get('name')
+                value = input_field.get('value')
+                if name and name not in ['email', 'password']:
+                    form_data[name] = value
+                    
+            # Добавляем учетные данные
+            form_data['email'] = self.email
+            form_data['password'] = self.password
+            
+            # Отправляем форму входа
+            logging.info("Submitting login form")
+            login_response = self.session.post(
+                post_url,
+                data=form_data,
+                headers={
+                    **self.headers,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Referer': login_url
+                }
+            )
+            
+            # Проверяем успешность входа
+            if 'auth-error-message' in login_response.text:
+                logging.error("Authentication failed: invalid credentials")
+                return False
+                
+            if "Your Account" in login_response.text or "Hello," in login_response.text:
+                logging.info("Successfully authenticated with Amazon")
+                self.is_authenticated = True
+                return True
+                
+            # Проверяем перенаправление на страницу Kindle
+            if "read.amazon.com" in login_response.url:
+                logging.info("Redirected to Kindle Cloud Reader, authentication successful")
+                self.is_authenticated = True
+                return True
+                
+            logging.warning("Authentication status uncertain, proceeding anyway")
+            self.is_authenticated = True
+            return True
+            
+        except Exception as e:
+            logging.error(f"Error during authentication: {e}")
+            return False
+
     def run(self):
         """
         Запускает процесс извлечения
@@ -277,6 +369,12 @@ class KindleWebScraper:
         """
         logging.info(f"Starting extraction from URL: {self.book_url}")
         success = False
+        
+        # Авторизуемся, если предоставлены учетные данные
+        if self.email and self.password:
+            auth_success = self.authenticate()
+            if not auth_success:
+                logging.error("Authentication failed, extraction might be limited")
         
         # Пробуем получить контент через trafilatura
         content_extracted = self.get_book_content()

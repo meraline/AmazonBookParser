@@ -37,6 +37,17 @@
                             </div>
                             
                             <div class="mb-3">
+                                <label for="email" class="form-label">Email для входа в Amazon</label>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="your.email@example.com">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Пароль для входа в Amazon</label>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Ваш пароль">
+                                <div class="form-text">Учетные данные необходимы для автоматической авторизации и доступа к содержимому книги</div>
+                            </div>
+                            
+                            <div class="mb-3">
                                 <label for="page_count" class="form-label">Количество страниц для автоматического извлечения</label>
                                 <input type="number" class="form-control" id="page_count" name="page_count" value="50" min="1" max="1000">
                             </div>
@@ -129,6 +140,7 @@
                                 <li>Используйте этот метод только для книг, которые вы приобрели легально</li>
                                 <li>Для доступа к книге требуется активная сессия в Amazon Kindle</li>
                                 <li>URL должен начинаться с https://read.amazon.com/</li>
+                                <li>Введите вашу учетную запись Amazon для автоматической авторизации</li>
                             </ul>
                         </div>
                     </div>
