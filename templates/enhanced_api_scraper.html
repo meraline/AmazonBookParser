@@ -3,138 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kindle Enhanced API Scraper</title>
+    <title>Улучшенный Kindle API Scraper</title>
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
-    <style>
-        body {
-            padding-top: 20px;
-            padding-bottom: 40px;
-        }
-        
-        .card {
-            margin-bottom: 20px;
-        }
-        
-        .log-container {
-            height: 400px;
-            overflow-y: auto;
-            background-color: var(--bs-dark);
-            border-radius: 5px;
-            padding: 10px;
-        }
-        
-        .log-content {
-            color: var(--bs-light);
-            font-family: monospace;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-        
-        .feature-icon {
-            font-size: 2.5rem;
-            color: var(--bs-primary);
-        }
-
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .image-thumbnail {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .modal-body img {
-            max-width: 100%;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center mb-4">
-                <h1>Kindle Enhanced API Scraper</h1>
-                <p class="lead">Улучшенный парсер для извлечения текста и изображений из Kindle Cloud Reader</p>
-            </div>
-        </div>
-        
+<body data-bs-theme="dark">
+    <div class="container py-4">
+        <header class="pb-3 mb-4 border-bottom">
+            <h1 class="display-5 fw-bold">Улучшенный парсер Kindle API</h1>
+            <p class="lead">Извлечение текста и изображений книги из Kindle Cloud Reader с поддержкой автоматизированного браузера</p>
+        </header>
+
         <div class="row">
             <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h2 class="card-title mb-0">Настройки парсера</h2>
-                        <span class="badge bg-success">Поддержка изображений</span>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h2 class="card-title">Настройки парсера</h2>
                     </div>
                     <div class="card-body">
                         <form id="enhancedApiScraperForm">
-                            <input type="hidden" name="method" value="enhanced_api">
-                            
                             <div class="mb-3">
-                                <p class="alert alert-success">
-                                    <strong>Улучшенный API-парсер</strong> позволяет:
-                                    <ul>
-                                        <li>Извлекать текст книги со всех страниц</li>
-                                        <li>Сохранять изображения из книги</li>
-                                        <li>Создавать структурированный JSON с контентом</li>
-                                        <li>Автоматически перехватывать API-запросы</li>
-                                    </ul>
-                                </p>
+                                <div class="alert alert-success">
+                                    <strong>Расширенный режим:</strong> Парсер запустит Chrome браузер, автоматически выполнит вход в Amazon и извлечет текст и все изображения из книги.
+                                </div>
                             </div>
                             
                             <div class="mb-3">
                                 <label for="book_url" class="form-label">URL книги в Kindle Cloud Reader</label>
-                                <input type="url" class="form-control" id="book_url" name="book_url" placeholder="https://read.amazon.com/..." required>
+                                <input type="url" class="form-control" id="book_url" name="book_url" placeholder="https://read.amazon.com/..." value="https://read.amazon.com/?asin=B009SE1Z9E" required>
                                 <div class="form-text">Например: https://read.amazon.com/?asin=B009SE1Z9E</div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email для входа в Amazon</label>
-                                <input type="email" class="form-control" id="email" name="email" placeholder="your.email@example.com" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Пароль для входа в Amazon</label>
-                                <input type="password" class="form-control" id="password" name="password" placeholder="Ваш пароль" required>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label">Email для входа в Amazon</label>
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="your.email@example.com" value="meraline7@gmail.com" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="password" class="form-label">Пароль для входа в Amazon</label>
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Ваш пароль" value="uYX-8q3-J6u-j8v" required>
+                                </div>
                                 <div class="form-text">Учетные данные необходимы для авторизации и доступа к книге</div>
                             </div>
                             
-                            <div class="row">
+                            <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="max_pages" class="form-label">Количество страниц</label>
-                                        <input type="number" class="form-control" id="max_pages" name="max_pages" value="20" min="1" max="1000">
-                                        <div class="form-text">Максимальное количество страниц для извлечения</div>
-                                    </div>
+                                    <label for="output_file" class="form-label">Файл для текста</label>
+                                    <input type="text" class="form-control" id="output_file" name="output_file" value="kindle_enhanced_book.txt" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="page_load_time" class="form-label">Задержка (сек)</label>
-                                        <input type="number" class="form-control" id="page_load_time" name="page_load_time" value="5" min="1" max="20" step="0.5">
-                                        <div class="form-text">Время ожидания загрузки страницы</div>
-                                    </div>
+                                    <label for="images_dir" class="form-label">Директория для изображений</label>
+                                    <input type="text" class="form-control" id="images_dir" name="images_dir" value="kindle_images" required>
                                 </div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="output_file" class="form-label">Имя файла для сохранения</label>
-                                <input type="text" class="form-control" id="output_file" name="output_file" value="kindle_enhanced_book.txt" required>
-                                <div class="form-text">Результат также будет сохранен в JSON формате в файле с расширением .json</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="images_dir" class="form-label">Директория для изображений</label>
-                                <input type="text" class="form-control" id="images_dir" name="images_dir" value="kindle_images" required>
-                                <div class="form-text">Все изображения из книги будут сохранены в этой директории</div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="max_pages" class="form-label">Количество страниц для обработки</label>
+                                    <input type="number" class="form-control" id="max_pages" name="max_pages" value="20" min="1" max="1000" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="page_load_time" class="form-label">Задержка между страницами (сек)</label>
+                                    <input type="number" class="form-control" id="page_load_time" name="page_load_time" value="5" min="1" max="20" step="0.5" required>
+                                </div>
                             </div>
                             
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary" id="startButton">Запустить улучшенный парсер</button>
+                                <button type="submit" class="btn btn-primary" id="startButton">Запустить парсер</button>
                                 <button type="button" class="btn btn-danger" id="stopButton" disabled>Остановить</button>
                             </div>
                         </form>
@@ -147,9 +82,10 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <a href="/" class="btn btn-secondary">Главная страница</a>
-                            <a href="/test_api_scraper" class="btn btn-secondary">Обычный API парсер</a>
-                            <a href="/test_web_scraper" class="btn btn-secondary">Веб-парсер</a>
+                            <a href="/" class="btn btn-secondary">Перейти к Selenium парсеру</a>
+                            <a href="/test_api_scraper" class="btn btn-secondary">Перейти к API парсеру</a>
+                            <a href="/test_web_scraper" class="btn btn-secondary">Перейти к веб-парсеру</a>
+                            <a href="/test_auto_api_scraper" class="btn btn-secondary">Перейти к авто API-парсеру</a>
                         </div>
                     </div>
                 </div>
@@ -157,12 +93,8 @@
             
             <div class="col-md-6">
                 <div class="card mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h2 class="card-title mb-0">Статус</h2>
-                        <div>
-                            <span class="badge bg-primary" id="pageCounter">0/0</span>
-                            <span class="badge bg-info" id="imageCounter">0 изображений</span>
-                        </div>
+                    <div class="card-header">
+                        <h2 class="card-title">Статус</h2>
                     </div>
                     <div class="card-body">
                         <div id="statusSection">
@@ -175,14 +107,7 @@
                             </div>
                             
                             <div class="mb-3">
-                                <p>Обработка: <span id="currentPage">0</span> из <span id="totalPages">0</span> страниц</p>
-                            </div>
-                        </div>
-                        
-                        <div id="imagesContainer" style="display: none;">
-                            <h3>Извлеченные изображения</h3>
-                            <div id="imageGrid" class="image-grid">
-                                <!-- Сюда будут добавляться изображения -->
+                                <p>Обработка: <span id="currentPage">0</span> из <span id="totalPages">0</span></p>
                             </div>
                         </div>
                     </div>
@@ -206,42 +131,30 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">Как работает улучшенный парсер</h2>
+                        <h2 class="card-title">Информация о расширенном API парсере</h2>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4 mb-4">
-                                <div class="text-center mb-3">
-                                    <span class="feature-icon">🔍</span>
-                                </div>
-                                <h3 class="text-center">Автоматическое извлечение</h3>
-                                <p>Парсер самостоятельно авторизуется, открывает книгу и перехватывает все API-запросы, в том числе запросы к изображениям.</p>
-                            </div>
-                            
-                            <div class="col-md-4 mb-4">
-                                <div class="text-center mb-3">
-                                    <span class="feature-icon">🖼️</span>
-                                </div>
-                                <h3 class="text-center">Сохранение изображений</h3>
-                                <p>Парсер извлекает и сохраняет все изображения из книги, восстанавливая их из перехваченных blob-данных и base64-строк.</p>
-                            </div>
-                            
-                            <div class="col-md-4 mb-4">
-                                <div class="text-center mb-3">
-                                    <span class="feature-icon">📚</span>
-                                </div>
-                                <h3 class="text-center">Пагинация и структура</h3>
-                                <p>Автоматически выполняется пагинация по заданному количеству страниц, с сохранением структуры книги и номеров страниц.</p>
-                            </div>
+                        <div class="alert alert-primary">
+                            <h4>Ключевые возможности парсера:</h4>
+                            <ul>
+                                <li><strong>Автоматическая авторизация</strong> - парсер сам войдет в вашу учетную запись Amazon</li>
+                                <li><strong>Извлечение текста</strong> - получение текста книги в структурированном формате</li>
+                                <li><strong>Извлечение изображений</strong> - сохранение всех изображений книги в выбранную директорию</li>
+                                <li><strong>Автоматическая пагинация</strong> - автоматический переход по страницам книги</li>
+                                <li><strong>Сохранение метаданных</strong> - сохранение данных о названии, авторе и структуре книги</li>
+                            </ul>
                         </div>
                         
                         <div class="alert alert-warning">
-                            <strong>Важно:</strong> 
-                            <ul>
-                                <li>Для работы парсера требуется валидный аккаунт Amazon с доступом к Kindle Cloud Reader.</li>
-                                <li>Необходимо указать корректный URL книги в формате Kindle Cloud Reader.</li>
-                                <li>Процесс может занять продолжительное время в зависимости от количества страниц и выбранной задержки.</li>
-                            </ul>
+                            <h4>Как это работает:</h4>
+                            <ol>
+                                <li>Запускается локальный браузер Chrome в режиме автоматизации</li>
+                                <li>Выполняется вход в Amazon с указанными учетными данными</li>
+                                <li>Открывается Kindle Cloud Reader и выбранная книга</li>
+                                <li>Парсер перехватывает API-ответы Amazon, содержащие текст и изображения</li>
+                                <li>Данные структурируются и сохраняются в форматах TXT (текст) и JSON (структурированные данные)</li>
+                                <li>Изображения сохраняются в указанную директорию</li>
+                            </ol>
                         </div>
                     </div>
                 </div>
@@ -249,32 +162,13 @@
         </div>
         
         <footer class="pt-3 mt-4 text-muted border-top">
-            &copy; 2023 Kindle Enhanced API Scraper
+            &copy; 2025 Kindle Enhanced API Scraper
         </footer>
-    </div>
-    
-    <!-- Модальное окно для просмотра изображений -->
-    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="imageModalLabel">Просмотр изображения</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <img id="modalImage" src="" alt="Enlarged image">
-                </div>
-                <div class="modal-footer">
-                    <p id="imageInfo" class="me-auto"></p>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const scraperForm = document.getElementById('enhancedApiScraperForm');
+            const enhancedApiScraperForm = document.getElementById('enhancedApiScraperForm');
             const startButton = document.getElementById('startButton');
             const stopButton = document.getElementById('stopButton');
             const statusMessage = document.getElementById('statusMessage');
@@ -282,21 +176,11 @@
             const progressBar = document.getElementById('progressBar');
             const currentPage = document.getElementById('currentPage');
             const totalPages = document.getElementById('totalPages');
-            const pageCounter = document.getElementById('pageCounter');
-            const imageCounter = document.getElementById('imageCounter');
             const logContainer = document.getElementById('logContainer');
             const clearLogButton = document.getElementById('clearLogButton');
-            const imagesContainer = document.getElementById('imagesContainer');
-            const imageGrid = document.getElementById('imageGrid');
-            
-            // Для модального окна
-            const imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
-            const modalImage = document.getElementById('modalImage');
-            const imageInfo = document.getElementById('imageInfo');
             
             let isRunning = false;
             let statusInterval = null;
-            let images = [];
             
             // Функция обновления статуса
             function updateStatus() {
@@ -321,16 +205,12 @@
                             // Обновляем счетчик страниц
                             currentPage.textContent = data.current_page;
                             totalPages.textContent = data.total_pages;
-                            pageCounter.textContent = `${data.current_page}/${data.total_pages}`;
                             
                             // Добавляем сообщения лога
                             if (data.log_messages && data.log_messages.length > 0) {
                                 logContainer.innerHTML = data.log_messages.join('<br>');
                                 // Прокручиваем к последнему сообщению
                                 logContainer.scrollTop = logContainer.scrollHeight;
-                                
-                                // Проверяем наличие изображений
-                                checkForImages(data.log_messages);
                             }
                         } else {
                             statusMessage.textContent = "Парсер не запущен";
@@ -342,13 +222,6 @@
                             if (data.current_page > 0) {
                                 statusMessage.textContent = "Процесс завершен";
                                 statusMessage.className = "alert alert-success";
-                                
-                                // Показываем сообщение об успешном завершении
-                                if (data.log_messages && data.log_messages.join(' ').includes('успешно')) {
-                                    setTimeout(() => {
-                                        alert('Книга успешно извлечена! Проверьте результаты в файлах и изображения в директории.');
-                                    }, 500);
-                                }
                             }
                             
                             // Останавливаем интервал, если процесс завершен
@@ -363,55 +236,11 @@
                     });
             }
             
-            // Функция для проверки наличия изображений в логах
-            function checkForImages(logs) {
-                // Ищем сообщения о сохранении изображений
-                for (const log of logs) {
-                    if (log.includes('Сохранено изображение:')) {
-                        const imageName = log.split('Сохранено изображение:')[1].trim();
-                        
-                        // Если изображение еще не добавлено в список, добавляем
-                        if (!images.includes(imageName)) {
-                            images.push(imageName);
-                            
-                            // Обновляем счетчик изображений
-                            imageCounter.textContent = `${images.length} изображений`;
-                            
-                            // Показываем контейнер с изображениями
-                            imagesContainer.style.display = 'block';
-                            
-                            // Добавляем изображение в сетку
-                            const imgPath = `/kindle_images/${imageName}`;
-                            const imgElement = document.createElement('img');
-                            imgElement.src = imgPath;
-                            imgElement.alt = imageName;
-                            imgElement.className = 'image-thumbnail';
-                            imgElement.dataset.name = imageName;
-                            
-                            // Добавляем обработчик клика для просмотра в модальном окне
-                            imgElement.addEventListener('click', function() {
-                                modalImage.src = imgPath;
-                                imageInfo.textContent = imageName;
-                                imageModal.show();
-                            });
-                            
-                            imageGrid.appendChild(imgElement);
-                        }
-                    }
-                }
-            }
-            
             // Обработчик отправки формы
-            scraperForm.addEventListener('submit', function(event) {
+            enhancedApiScraperForm.addEventListener('submit', function(event) {
                 event.preventDefault();
                 
-                // Сбрасываем список изображений
-                images = [];
-                imageGrid.innerHTML = '';
-                imagesContainer.style.display = 'none';
-                imageCounter.textContent = '0 изображений';
-                
-                const formData = new FormData(scraperForm);
+                const formData = new FormData(enhancedApiScraperForm);
                 
                 fetch('/start_enhanced_scraping', {
                     method: 'POST',

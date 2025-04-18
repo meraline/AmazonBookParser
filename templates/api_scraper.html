@@ -24,36 +24,66 @@
                         <form id="apiScraperForm">
                             <input type="hidden" name="method" value="api">
                             <div class="mb-3">
-                                <p class="alert alert-warning">
-                                    <strong>Важно!</strong> Amazon блокирует прямые запросы к своему API без браузера.
-                                    В текущей версии парсера, для получения данных книги вам необходимо использовать 
-                                    предопределенный файл с примером ответа API.
-                                </p>
-                                <p class="alert alert-info">
-                                    Для тестирования API-парсера нажмите кнопку "Запустить API парсер". 
-                                    Будет использован предопределенный пример ответа API для книги "Quantum Poker".
+                                <p class="alert alert-success">
+                                    <strong>Доступно две возможности:</strong>
+                                    <ul>
+                                        <li><strong>Использовать предопределенный файл</strong> - быстрый способ получить текст из примера ответа API.</li>
+                                        <li><strong>Использовать автоматизированный браузер Chrome</strong> - современный метод с поддержкой авторизации и извлечения изображений.</li>
+                                    </ul>
                                 </p>
                             </div>
                             
                             <div class="mb-3">
-                                <h5>Для будущего развития (требуется дополнительная реализация):</h5>
                                 <div class="form-check form-switch mb-3">
                                     <input class="form-check-input" type="checkbox" id="useResponseFile" name="useResponseFile" checked>
                                     <label class="form-check-label" for="useResponseFile">Использовать предопределенный файл</label>
                                 </div>
+                                <div id="predefinedFileInfo" class="alert alert-info">
+                                    <strong>Информация:</strong> Будет использован предопределенный пример ответа API для книги "Quantum Poker".
+                                </div>
                             </div>
                             
                             <div class="mb-3" id="directApiFieldsContainer" style="display: none;">
+                                <div class="alert alert-primary">
+                                    <strong>Автоматизированный режим:</strong> Будет запущен локальный Chrome браузер, который выполнит авторизацию и извлечет текст и изображения из книги.
+                                </div>
+                            
                                 <label for="book_url" class="form-label">URL книги в Kindle Cloud Reader</label>
-                                <input type="url" class="form-control" id="book_url" name="book_url" placeholder="https://read.amazon.com/...">
+                                <input type="url" class="form-control" id="book_url" name="book_url" placeholder="https://read.amazon.com/..." value="https://read.amazon.com/?asin=B009SE1Z9E">
                                 <div class="form-text">Например: https://read.amazon.com/?asin=B009SE1Z9E</div>
-                            
-                                <label for="email" class="form-label" class="mt-3">Email для входа в Amazon</label>
-                                <input type="email" class="form-control" id="email" name="email" placeholder="your.email@example.com">
-                            
-                                <label for="password" class="form-label" class="mt-3">Пароль для входа в Amazon</label>
-                                <input type="password" class="form-control" id="password" name="password" placeholder="Ваш пароль">
-                                <div class="form-text">Учетные данные необходимы для авторизации и доступа к API</div>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <label for="email" class="form-label">Email для входа в Amazon</label>
+                                        <input type="email" class="form-control" id="email" name="email" placeholder="your.email@example.com" value="meraline7@gmail.com">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="password" class="form-label">Пароль для входа в Amazon</label>
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="Ваш пароль" value="uYX-8q3-J6u-j8v">
+                                    </div>
+                                </div>
+                                <div class="form-text">Учетные данные необходимы для авторизации и доступа к книге</div>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <label for="max_pages" class="form-label">Количество страниц</label>
+                                        <input type="number" class="form-control" id="max_pages" name="max_pages" value="20" min="1" max="1000">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="page_load_time" class="form-label">Задержка между страницами (сек)</label>
+                                        <input type="number" class="form-control" id="page_load_time" name="page_load_time" value="5" min="1" max="20" step="0.5">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-check form-switch mt-3">
+                                    <input class="form-check-input" type="checkbox" id="extract_images" name="extract_images" checked>
+                                    <label class="form-check-label" for="extract_images">Извлекать изображения из книги</label>
+                                </div>
+                                
+                                <div id="imagesOptions" class="mt-2">
+                                    <label for="images_dir" class="form-label">Директория для изображений</label>
+                                    <input type="text" class="form-control" id="images_dir" name="images_dir" value="kindle_images">
+                                </div>
                             </div>
                             
                             <div class="mb-3">
@@ -77,6 +107,8 @@
                         <div class="d-grid gap-2">
                             <a href="/" class="btn btn-secondary">Перейти к Selenium парсеру</a>
                             <a href="/test_web_scraper" class="btn btn-secondary">Перейти к веб-парсеру</a>
+                            <a href="/test_auto_api_scraper" class="btn btn-secondary">Перейти к авто API-парсеру</a>
+                            <a href="/test_enhanced_api_scraper" class="btn btn-outline-primary">Перейти к расширенному API-парсеру</a>
                         </div>
                     </div>
                 </div>
@@ -184,12 +216,35 @@
             // Обработчик переключения между предопределенным файлом и прямым API
             const useResponseFileCheckbox = document.getElementById('useResponseFile');
             const directApiFieldsContainer = document.getElementById('directApiFieldsContainer');
+            const predefinedFileInfo = document.getElementById('predefinedFileInfo');
+            const extractImagesCheckbox = document.getElementById('extract_images');
+            const imagesOptionsContainer = document.getElementById('imagesOptions');
             
+            // Показывает или скрывает опции изображений в зависимости от состояния чекбокса
+            extractImagesCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    imagesOptionsContainer.style.display = 'block';
+                } else {
+                    imagesOptionsContainer.style.display = 'none';
+                }
+            });
+            
+            // Обработчик переключения между предопределенным файлом и автоматизированным режимом
             useResponseFileCheckbox.addEventListener('change', function() {
                 if (this.checked) {
+                    // Если выбран предопределенный файл
                     directApiFieldsContainer.style.display = 'none';
+                    predefinedFileInfo.style.display = 'block';
+                    
+                    // Меняем value поля метода
+                    document.querySelector('input[name="method"]').value = 'api';
                 } else {
+                    // Если выбран автоматизированный режим
                     directApiFieldsContainer.style.display = 'block';
+                    predefinedFileInfo.style.display = 'none';
+                    
+                    // Меняем value поля метода на enhanced_api
+                    document.querySelector('input[name="method"]').value = 'enhanced_api';
                 }
             });
             
@@ -252,8 +307,15 @@
                 event.preventDefault();
                 
                 const formData = new FormData(apiScraperForm);
+                const method = formData.get('method');
+                let endpoint = '/start_scraping';
                 
-                fetch('/start_scraping', {
+                // Если используется enhanced_api, отправляем на другой эндпоинт
+                if (method === 'enhanced_api') {
+                    endpoint = '/start_enhanced_scraping';
+                }
+                
+                fetch(endpoint, {
                     method: 'POST',
                     body: formData
                 })
