@@ -537,6 +537,89 @@ class KindleAutoAPIScraper:
 
     @log_function_call(parsing_logger)
     @log_function_call(selenium_logger)
+    def manual_screenshots_mode(self):
+        """
+        Режим ручного перелистывания: ожидает, пока пользователь перелистывает страницы,
+        и делает скриншот после каждого изменения страницы.
+        
+        :return: True если успешно, иначе False
+        """
+        try:
+            selenium_logger.info("Запущен режим ручного перелистывания страниц со скриншотами")
+            
+            # Создаем директорию для скриншотов, если она не существует
+            screenshots_dir = os.path.join(os.getcwd(), "kindle_screenshots")
+            if not os.path.exists(screenshots_dir):
+                os.makedirs(screenshots_dir)
+                selenium_logger.info(f"Создана директория для скриншотов: {screenshots_dir}")
+            
+            # Ждем некоторое время, чтобы интерфейс Kindle полностью загрузился
+            time.sleep(self.page_load_time)
+            
+            # Начинаем с первой страницы
+            current_page = 1
+            max_pages = 300  # Безопасное ограничение
+            last_page_source = ""
+            
+            # Делаем скриншот первой страницы
+            screenshot_path = os.path.join(screenshots_dir, f"page_{current_page:04d}.png")
+            selenium_logger.info(f"Делаем скриншот страницы {current_page}")
+            self.driver.save_screenshot(screenshot_path)
+            selenium_logger.info(f"Скриншот сохранен: {screenshot_path}")
+            
+            # Получаем исходный код первой страницы для сравнения
+            last_page_source = self.driver.page_source
+            
+            # Выводим сообщение для пользователя
+            print("\n" + "="*80)
+            print("РЕЖИМ РУЧНОГО ПЕРЕЛИСТЫВАНИЯ АКТИВИРОВАН:")
+            print("1. Перелистывайте страницы книги с помощью клавиш или мыши")
+            print("2. Система автоматически делает скриншот каждой новой страницы")
+            print("3. Нажмите Ctrl+C в консоли для завершения режима")
+            print("="*80 + "\n")
+            
+            # Обновляем callback при наличии
+            if self.current_page_callback:
+                self.current_page_callback(current_page, max_pages)
+            
+            try:
+                # Основной цикл ожидания изменений
+                while current_page < max_pages:
+                    # Ждем некоторое время перед проверкой
+                    time.sleep(1)
+                    
+                    # Проверяем, изменилась ли страница
+                    current_page_source = self.driver.page_source
+                    if current_page_source != last_page_source:
+                        # Страница изменилась, делаем скриншот
+                        current_page += 1
+                        
+                        # Обновляем callback при наличии
+                        if self.current_page_callback:
+                            self.current_page_callback(current_page, max_pages)
+                        
+                        # Делаем скриншот
+                        screenshot_path = os.path.join(screenshots_dir, f"page_{current_page:04d}.png")
+                        selenium_logger.info(f"Обнаружено изменение страницы! Делаем скриншот страницы {current_page}")
+                        self.driver.save_screenshot(screenshot_path)
+                        selenium_logger.info(f"Скриншот сохранен: {screenshot_path}")
+                        
+                        # Обновляем исходный код страницы
+                        last_page_source = current_page_source
+                        
+            except KeyboardInterrupt:
+                selenium_logger.info("Получен сигнал прерывания, завершаем режим ручного скриншота")
+            
+            selenium_logger.info(f"Режим ручного перелистывания завершен. Создано {current_page} скриншотов.")
+            selenium_logger.info(f"Скриншоты сохранены в директории: {screenshots_dir}")
+            return True
+            
+        except Exception as e:
+            selenium_logger.error(f"Ошибка в режиме ручного перелистывания: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
+            return False
+
+    @log_function_call(selenium_logger)
     def navigate_with_screenshots(self):
         """
         Перелистывает страницы книги и делает скриншот каждой страницы
@@ -1037,10 +1120,10 @@ class KindleAutoAPIScraper:
                 self.cleanup()
                 return False
                 
-            # Создаем скриншоты страниц книги и перелистываем страницы
-            selenium_logger.info("Создаем скриншоты страниц книги")
-            if not self.navigate_with_screenshots():
-                selenium_logger.warning("Не удалось создать скриншоты страниц книги")
+            # Создаем скриншоты страниц книги (ручной режим)
+            selenium_logger.info("Создаем скриншоты страниц в ручном режиме - пользователь перелистывает, скрипт делает скриншоты")
+            if not self.manual_screenshots_mode():
+                selenium_logger.warning("Не удалось создать скриншоты страниц книги в ручном режиме")
                 # Продолжаем выполнение, так как это не критическая ошибка
             
             # Перехватываем сетевой трафик

@@ -1,0 +1,209 @@
+(base) analityk@ofis:~/Документы/github/AmazonBookParser-1$ python main.py
+2025-04-18 16:28:21,891 - DEBUG - Модуль requests успешно пропатчен для логирования
+2025-04-18 16:28:21,892 - INFO - Модуль kindle_auto_api_scraper инициализирован
+2025-04-18 16:28:21,892 - INFO - Модуль kindle_auto_api_scraper инициализирован
+2025-04-18 16:28:21,892 - INFO - Модуль kindle_auto_api_scraper инициализирован
+ * Serving Flask app 'main'
+ * Debug mode: on
+2025-04-18 16:28:21,901 - INFO - WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.13.13.2:5000
+2025-04-18 16:28:21,901 - INFO - WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.13.13.2:5000
+2025-04-18 16:28:21,901 - INFO - WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.13.13.2:5000
+2025-04-18 16:28:21,901 - INFO - Press CTRL+C to quit
+2025-04-18 16:28:21,901 - INFO - Press CTRL+C to quit
+2025-04-18 16:28:21,901 - INFO - Press CTRL+C to quit
+2025-04-18 16:28:21,905 - INFO -  * Restarting with watchdog (inotify)
+2025-04-18 16:28:21,905 - INFO -  * Restarting with watchdog (inotify)
+2025-04-18 16:28:21,905 - INFO -  * Restarting with watchdog (inotify)
+2025-04-18 16:28:22,359 - DEBUG - Модуль requests успешно пропатчен для логирования
+2025-04-18 16:28:22,359 - INFO - Модуль kindle_auto_api_scraper инициализирован
+2025-04-18 16:28:22,359 - INFO - Модуль kindle_auto_api_scraper инициализирован
+2025-04-18 16:28:22,359 - INFO - Модуль kindle_auto_api_scraper инициализирован
+2025-04-18 16:28:22,368 - WARNING -  * Debugger is active!
+2025-04-18 16:28:22,368 - WARNING -  * Debugger is active!
+2025-04-18 16:28:22,368 - WARNING -  * Debugger is active!
+2025-04-18 16:28:22,368 - INFO -  * Debugger PIN: 143-214-449
+2025-04-18 16:28:22,368 - INFO -  * Debugger PIN: 143-214-449
+2025-04-18 16:28:22,368 - INFO -  * Debugger PIN: 143-214-449
+2025-04-18 16:28:36,346 - INFO - 127.0.0.1 - - [18/Apr/2025 16:28:36] "GET /test_auto_api_scraper HTTP/1.1" 200 -
+2025-04-18 16:28:36,346 - INFO - 127.0.0.1 - - [18/Apr/2025 16:28:36] "GET /test_auto_api_scraper HTTP/1.1" 200 -
+2025-04-18 16:28:36,346 - INFO - 127.0.0.1 - - [18/Apr/2025 16:28:36] "GET /test_auto_api_scraper HTTP/1.1" 200 -
+2025-04-18 16:28:37,004 - INFO - 127.0.0.1 - - [18/Apr/2025 16:28:37] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:28:37,004 - INFO - 127.0.0.1 - - [18/Apr/2025 16:28:37] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:28:37,004 - INFO - 127.0.0.1 - - [18/Apr/2025 16:28:37] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:05,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:05] "POST /start_scraping HTTP/1.1" 200 -
+2025-04-18 16:29:05,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:05] "POST /start_scraping HTTP/1.1" 200 -
+2025-04-18 16:29:05,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:05] "POST /start_scraping HTTP/1.1" 200 -
+2025-04-18 16:29:05,967 - DEBUG - НАЧАЛО run - Аргументы: (<kindle_auto_api_scraper.KindleAutoAPIScraper object at 0x7ad64c0ae960>,), Kwargs: {}
+2025-04-18 16:29:05,968 - INFO - Запускаем процесс извлечения книги
+2025-04-18 16:29:05,968 - INFO - Запускаем процесс извлечения книги
+2025-04-18 16:29:05,968 - INFO - Запускаем процесс извлечения книги
+2025-04-18 16:29:05,968 - INFO - Запускаем процесс извлечения книги
+2025-04-18 16:29:05,968 - INFO - URL книги: https://read.amazon.com/?x-client-id=ads-store&_encoding=UTF8&asin=B009SE1Z9E&consumptionLimitReached=false&hasMultimedia=false&requiredCapabilities=EBOK_PURCHASE_ALLOWED&ref_=ast_author_rff
+2025-04-18 16:29:05,968 - INFO - URL книги: https://read.amazon.com/?x-client-id=ads-store&_encoding=UTF8&asin=B009SE1Z9E&consumptionLimitReached=false&hasMultimedia=false&requiredCapabilities=EBOK_PURCHASE_ALLOWED&ref_=ast_author_rff
+2025-04-18 16:29:05,968 - INFO - URL книги: https://read.amazon.com/?x-client-id=ads-store&_encoding=UTF8&asin=B009SE1Z9E&consumptionLimitReached=false&hasMultimedia=false&requiredCapabilities=EBOK_PURCHASE_ALLOWED&ref_=ast_author_rff
+2025-04-18 16:29:05,968 - INFO - URL книги: https://read.amazon.com/?x-client-id=ads-store&_encoding=UTF8&asin=B009SE1Z9E&consumptionLimitReached=false&hasMultimedia=false&requiredCapabilities=EBOK_PURCHASE_ALLOWED&ref_=ast_author_rff
+2025-04-18 16:29:05,969 - INFO - ASIN книги: B009SE1Z9E
+2025-04-18 16:29:05,969 - INFO - ASIN книги: B009SE1Z9E
+2025-04-18 16:29:05,969 - INFO - ASIN книги: B009SE1Z9E
+2025-04-18 16:29:05,969 - INFO - ASIN книги: B009SE1Z9E
+2025-04-18 16:29:05,969 - INFO - Настраиваем веб-драйвер
+2025-04-18 16:29:05,969 - INFO - Настраиваем веб-драйвер
+2025-04-18 16:29:05,969 - INFO - Настраиваем веб-драйвер
+2025-04-18 16:29:05,969 - INFO - Настраиваем веб-драйвер
+2025-04-18 16:29:05,970 - DEBUG - НАЧАЛО setup_driver - Аргументы: (<kindle_auto_api_scraper.KindleAutoAPIScraper object at 0x7ad64c0ae960>,), Kwargs: {}
+2025-04-18 16:29:05,970 - INFO - Пробуем настроить локально установленный браузер
+2025-04-18 16:29:05,970 - INFO - Пробуем настроить локально установленный браузер
+2025-04-18 16:29:05,970 - INFO - Пробуем настроить локально установленный браузер
+2025-04-18 16:29:05,970 - INFO - Пробуем настроить локально установленный браузер
+2025-04-18 16:29:05,971 - INFO - Пробуем локальный Firefox с поиском пути
+2025-04-18 16:29:05,971 - INFO - Пробуем локальный Firefox с поиском пути
+2025-04-18 16:29:05,971 - INFO - Пробуем локальный Firefox с поиском пути
+2025-04-18 16:29:05,971 - INFO - Пробуем локальный Firefox с поиском пути
+2025-04-18 16:29:05,971 - INFO - Найден Firefox по пути: /usr/bin/firefox
+2025-04-18 16:29:05,972 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:05] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:05,972 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:05] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:05,972 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:05] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:05,971 - INFO - Найден Firefox по пути: /usr/bin/firefox
+2025-04-18 16:29:05,971 - INFO - Найден Firefox по пути: /usr/bin/firefox
+2025-04-18 16:29:05,971 - INFO - Найден Firefox по пути: /usr/bin/firefox
+2025-04-18 16:29:06,278 - WARNING - Не удалось запустить локальный Firefox: Message: binary is not a Firefox executable
+
+2025-04-18 16:29:06,278 - WARNING - Не удалось запустить локальный Firefox: Message: binary is not a Firefox executable
+
+2025-04-18 16:29:06,278 - WARNING - Не удалось запустить локальный Firefox: Message: binary is not a Firefox executable
+
+2025-04-18 16:29:06,278 - WARNING - Не удалось запустить локальный Firefox: Message: binary is not a Firefox executable
+
+2025-04-18 16:29:06,279 - INFO - Пробуем локальный Chrome со стандартными опциями
+2025-04-18 16:29:06,279 - INFO - Пробуем локальный Chrome со стандартными опциями
+2025-04-18 16:29:06,279 - INFO - Пробуем локальный Chrome со стандартными опциями
+2025-04-18 16:29:06,279 - INFO - Пробуем локальный Chrome со стандартными опциями
+2025-04-18 16:29:06,279 - INFO - Найден Chrome по пути: /usr/bin/chromium-browser
+2025-04-18 16:29:06,279 - INFO - Найден Chrome по пути: /usr/bin/chromium-browser
+2025-04-18 16:29:06,279 - INFO - Найден Chrome по пути: /usr/bin/chromium-browser
+2025-04-18 16:29:06,279 - INFO - Найден Chrome по пути: /usr/bin/chromium-browser
+2025-04-18 16:29:06,972 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:06] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:06,972 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:06] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:06,972 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:06] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:07,138 - INFO - Chrome запущен успешно с локальным драйвером
+2025-04-18 16:29:07,138 - INFO - Chrome запущен успешно с локальным драйвером
+2025-04-18 16:29:07,138 - INFO - Chrome запущен успешно с локальным драйвером
+2025-04-18 16:29:07,138 - INFO - Chrome запущен успешно с локальным драйвером
+2025-04-18 16:29:07,138 - DEBUG - КОНЕЦ setup_driver - Время выполнения: 1.17с - Результат: True
+2025-04-18 16:29:07,139 - INFO - Открываем Kindle Cloud Reader
+2025-04-18 16:29:07,139 - INFO - Открываем Kindle Cloud Reader
+2025-04-18 16:29:07,139 - INFO - Открываем Kindle Cloud Reader
+2025-04-18 16:29:07,139 - INFO - Открываем Kindle Cloud Reader
+2025-04-18 16:29:07,139 - INFO - Открываем Kindle Cloud Reader
+2025-04-18 16:29:07,139 - INFO - Открываем Kindle Cloud Reader
+2025-04-18 16:29:07,139 - INFO - Открываем Kindle Cloud Reader
+2025-04-18 16:29:07,972 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:07] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:07,972 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:07] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:07,972 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:07] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:08,978 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:08] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:08,978 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:08] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:08,978 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:08] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:09,050 - INFO - Kindle Cloud Reader успешно открыт
+2025-04-18 16:29:09,050 - INFO - Kindle Cloud Reader успешно открыт
+2025-04-18 16:29:09,050 - INFO - Kindle Cloud Reader успешно открыт
+2025-04-18 16:29:09,051 - INFO - Открываем книгу, ASIN: B009SE1Z9E
+2025-04-18 16:29:09,051 - INFO - Открываем книгу, ASIN: B009SE1Z9E
+2025-04-18 16:29:09,051 - INFO - Открываем книгу, ASIN: B009SE1Z9E
+2025-04-18 16:29:09,051 - INFO - Открываем книгу, ASIN: B009SE1Z9E
+2025-04-18 16:29:09,051 - INFO - Открываем книгу по URL: https://read.amazon.com/?x-client-id=ads-store&_encoding=UTF8&asin=B009SE1Z9E&consumptionLimitReached=false&hasMultimedia=false&requiredCapabilities=EBOK_PURCHASE_ALLOWED&ref_=ast_author_rff
+2025-04-18 16:29:09,051 - INFO - Открываем книгу по URL: https://read.amazon.com/?x-client-id=ads-store&_encoding=UTF8&asin=B009SE1Z9E&consumptionLimitReached=false&hasMultimedia=false&requiredCapabilities=EBOK_PURCHASE_ALLOWED&ref_=ast_author_rff
+2025-04-18 16:29:09,051 - INFO - Открываем книгу по URL: https://read.amazon.com/?x-client-id=ads-store&_encoding=UTF8&asin=B009SE1Z9E&consumptionLimitReached=false&hasMultimedia=false&requiredCapabilities=EBOK_PURCHASE_ALLOWED&ref_=ast_author_rff
+2025-04-18 16:29:09,971 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:09] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:09,971 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:09] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:09,971 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:09] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:10,971 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:10] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:10,971 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:10] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:10,971 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:10] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:11,971 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:11] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:11,971 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:11] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:11,971 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:11] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:13,012 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:13] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:13,012 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:13] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:13,012 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:13] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:13,972 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:13] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:13,972 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:13] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:13,972 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:13] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:15,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:15] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:15,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:15] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:15,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:15] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:17,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:17] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:17,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:17] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:17,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:17] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:19,968 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:19] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:19,968 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:19] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:19,968 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:19] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:21,968 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:21] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:21,968 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:21] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:21,968 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:21] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:23,969 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:23] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:23,969 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:23] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:23,969 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:23] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:25,973 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:25] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:25,973 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:25] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:25,973 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:25] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:27,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:27] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:27,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:27] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:27,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:27] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:29,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:29] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:29,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:29] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:29,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:29] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:31,969 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:31] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:31,969 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:31] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:31,969 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:31] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:33,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:33] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:33,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:33] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:33,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:33] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:35,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:35] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:35,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:35] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:35,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:35] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:37,968 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:37] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:37,968 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:37] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:37,968 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:37] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:39,966 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:39] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:39,966 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:39] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:39,966 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:39] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:41,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:41] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:41,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:41] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:41,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:41] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:43,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:43] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:43,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:43] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:43,967 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:43] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:45,867 - ERROR - Ошибка при открытии книги. Проверьте URL или ASIN.
+2025-04-18 16:29:45,867 - ERROR - Ошибка при открытии книги. Проверьте URL или ASIN.
+2025-04-18 16:29:45,867 - ERROR - Ошибка при открытии книги. Проверьте URL или ASIN.
+2025-04-18 16:29:45,867 - ERROR - Не удалось открыть книгу, ASIN: B009SE1Z9E
+2025-04-18 16:29:45,867 - ERROR - Не удалось открыть книгу, ASIN: B009SE1Z9E
+2025-04-18 16:29:45,867 - ERROR - Не удалось открыть книгу, ASIN: B009SE1Z9E
+2025-04-18 16:29:45,867 - ERROR - Не удалось открыть книгу, ASIN: B009SE1Z9E
+2025-04-18 16:29:45,868 - DEBUG - НАЧАЛО cleanup - Аргументы: (<kindle_auto_api_scraper.KindleAutoAPIScraper object at 0x7ad64c0ae960>,), Kwargs: {}
+2025-04-18 16:29:45,868 - INFO - Закрываем браузер
+2025-04-18 16:29:45,868 - INFO - Закрываем браузер
+2025-04-18 16:29:45,868 - INFO - Закрываем браузер
+2025-04-18 16:29:45,868 - INFO - Закрываем браузер
+2025-04-18 16:29:45,968 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:45] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:45,968 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:45] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:45,968 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:45] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:45,989 - DEBUG - Скриншот сохранен: final_state_before_quit -> logs/screenshots/20250418-162945_final_state_before_quit.png
+2025-04-18 16:29:46,055 - INFO - Браузер успешно закрыт
+2025-04-18 16:29:46,055 - INFO - Браузер успешно закрыт
+2025-04-18 16:29:46,055 - INFO - Браузер успешно закрыт
+2025-04-18 16:29:46,055 - INFO - Браузер успешно закрыт
+2025-04-18 16:29:46,056 - DEBUG - КОНЕЦ cleanup - Время выполнения: 0.19с - Результат: None
+2025-04-18 16:29:46,056 - DEBUG - КОНЕЦ run - Время выполнения: 40.09с - Результат: False
+2025-04-18 16:29:47,968 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:47] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:47,968 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:47] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 16:29:47,968 - INFO - 127.0.0.1 - - [18/Apr/2025 16:29:47] "GET /get_status HTTP/1.1" 200 -
