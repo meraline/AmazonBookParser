@@ -1,0 +1,25 @@
+ v0.36.0
+2025-04-18 09:10:46,159 - INFO - About to download new driver from https://github.com/mozilla/geckodriver/releases/download/v0.36.0/geckodriver-v0.36.0-linux64.tar.gz
+2025-04-18 09:10:46,637 - INFO - 127.0.0.1 - - [18/Apr/2025 09:10:46] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 09:10:46,900 - INFO - Driver downloading response is 200
+2025-04-18 09:10:47,289 - INFO - Get LATEST geckodriver version for 137.0 firefox
+2025-04-18 09:10:47,595 - INFO - Driver has been saved in cache [/home/analityk/.wdm/drivers/geckodriver/linux64/v0.36.0]
+2025-04-18 09:10:47,639 - INFO - 127.0.0.1 - - [18/Apr/2025 09:10:47] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 09:10:48,637 - INFO - 127.0.0.1 - - [18/Apr/2025 09:10:48] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 09:10:49,637 - INFO - 127.0.0.1 - - [18/Apr/2025 09:10:49] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 09:10:50,637 - INFO - 127.0.0.1 - - [18/Apr/2025 09:10:50] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 09:10:51,637 - INFO - 127.0.0.1 - - [18/Apr/2025 09:10:51] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 09:10:52,638 - INFO - 127.0.0.1 - - [18/Apr/2025 09:10:52] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 09:10:52,739 - ERROR - Ошибка при настройке драйвера: Message: Process unexpectedly closed with status 1
+
+2025-04-18 09:10:53,637 - INFO - 127.0.0.1 - - [18/Apr/2025 09:10:53] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 09:12:15,800 - INFO - Настройка веб-драйвера Firefox...
+2025-04-18 09:12:15,800 - INFO - 127.0.0.1 - - [18/Apr/2025 09:12:15] "POST /start_scraping HTTP/1.1" 200 -
+2025-04-18 09:12:15,801 - INFO - ====== WebDriver manager ======
+2025-04-18 09:12:15,804 - INFO - 127.0.0.1 - - [18/Apr/2025 09:12:15] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 09:12:16,036 - INFO - Get LATEST geckodriver version for 137.0 firefox
+2025-04-18 09:12:16,436 - INFO - Get LATEST geckodriver version for 137.0 firefox
+2025-04-18 09:12:16,675 - INFO - Driver [/home/analityk/.wdm/drivers/geckodriver/linux64/v0.36.0/geckodriver] found in cache
+2025-04-18 09:12:16,805 - INFO - 127.0.0.1 - - [18/Apr/2025 09:12:16] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 09:12:17,804 - INFO - 127.0.0.1 - - [18/Apr/2025 09:12:17] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 09:12:18,804 - INFO - 127.0.0.1 - - [18/Apr/2025 09:12:18] "GET /get_status HTTP/1.1" 200 -
