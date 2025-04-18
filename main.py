@@ -4,13 +4,11 @@ import threading
 import time
 import logging
 import json
-import traceback
 from kindle_scraper import KindleScraper
 from kindle_api_scraper import KindleAPIScraper
 from kindle_web_scraper import KindleWebScraper
 from kindle_auto_api_scraper import KindleAutoAPIScraper
 from kindle_api_scraper_enhanced import KindleAPIScraperEnhanced
-from kindle_light_scraper import KindleLightScraper
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
@@ -266,11 +264,6 @@ def test_enhanced_api_scraper():
     """Тестовая страница для улучшенного API скрапера с поддержкой изображений"""
     return render_template('enhanced_api_scraper.html')
 
-@app.route('/test_light_scraper')
-def test_light_scraper():
-    """Тестовая страница для облегченного скрапера (оптимизирован для Replit)"""
-    return render_template('light_scraper.html')
-
 def run_auto_api_scraper(book_url, output_file, email=None, password=None, page_load_time=5):
     """Функция для запуска автоматического API скрапера в отдельном потоке"""
     try:
@@ -419,89 +412,6 @@ def run_web_scraper(book_url, output_file, email=None, password=None, page_count
         
     except Exception as e:
         log_handler(f"Ошибка в процессе веб-скрапинга: {str(e)}")
-    finally:
-        scraper_status["running"] = False
-
-def run_light_scraper(book_url, output_file, email=None, password=None, max_pages=50):
-    """Функция для запуска облегченного скрапера в отдельном потоке"""
-    try:
-        scraper_status["running"] = True
-        scraper_status["progress"] = 0
-        scraper_status["total_pages"] = max_pages
-        scraper_status["current_page"] = 0
-        scraper_status["log_messages"] = []
-        
-        log_handler("Запуск облегченного скрапера (оптимизирован для Replit)")
-        
-        # Создаем экземпляр облегченного скрапера
-        scraper = KindleLightScraper(
-            email=email,
-            password=password,
-            book_url=book_url,
-            output_file=output_file,
-            max_pages=max_pages
-        )
-        
-        # Устанавливаем обработчик обновления текущей страницы
-        def update_status_callback(current_page, total_pages):
-            scraper_status["current_page"] = current_page
-            scraper_status["total_pages"] = total_pages if total_pages > 0 else max_pages
-            # Вычисляем прогресс на основе текущей страницы
-            progress = min(100, int((current_page / max_pages) * 100))
-            scraper_status["progress"] = progress
-            
-        # Привязываем обработчик к скраперу
-        scraper.current_page_callback = update_status_callback
-        
-        # Показываем информацию о параметрах запуска
-        log_handler(f"Обработка книги по URL: {book_url}")
-        if email:
-            log_handler(f"Авторизация с учетной записью: {email}")
-        
-        # Получаем и показываем ASIN книги
-        book_id = scraper.book_id
-        if book_id:
-            log_handler(f"Обнаружен ASIN книги: {book_id}")
-        else:
-            log_handler(f"ASIN книги не найден, будет использоваться полный URL")
-            
-        log_handler(f"Максимальное количество страниц для обработки: {max_pages}")
-        
-        # Засекаем время начала обработки
-        start_time = time.time()
-        
-        # Запускаем процесс извлечения
-        success = scraper.run()
-        
-        # Засекаем время окончания обработки
-        end_time = time.time()
-        processing_time = end_time - start_time
-        
-        if success:
-            scraper_status["progress"] = 100
-            log_handler(f"Текст успешно извлечен и сохранен в файл: {output_file}")
-            log_handler(f"Время обработки: {processing_time:.2f} секунд")
-            
-            # Сообщаем о сохранении структурированного JSON
-            json_file = output_file.replace('.txt', '.json')
-            log_handler(f"Структурированные данные сохранены в файл: {json_file}")
-            
-            # Выводим информацию о книге
-            if hasattr(scraper, 'structured_content') and scraper.structured_content:
-                if "result" in scraper.structured_content:
-                    result = scraper.structured_content["result"]
-                    if "title" in result and result["title"]:
-                        log_handler(f"Название книги: {result['title']}")
-                    if "author" in result and result["author"]:
-                        log_handler(f"Автор: {result['author']}")
-                    if "content" in result and isinstance(result["content"], list):
-                        log_handler(f"Извлечено страниц: {len(result['content'])}")
-        else:
-            log_handler("Ошибка при извлечении текста с помощью облегченного скрапера")
-            
-    except Exception as e:
-        log_handler(f"Ошибка в процессе работы облегченного скрапера: {str(e)}")
-        log_handler(f"Трассировка: {traceback.format_exc()}")
     finally:
         scraper_status["running"] = False
 
@@ -765,29 +675,6 @@ def start_scraping():
         threading.Thread(
             target=run_enhanced_api_scraper,
             args=(book_url, output_file, email, password, images_dir, max_pages, page_load_time)
-        ).start()
-        
-    elif method == 'light':
-        # Получаем параметры для облегченного скрапера
-        book_url = request.form.get('book_url', '')
-        output_file = request.form.get('output_file', 'kindle_light_book.txt')
-        email = request.form.get('email', '')
-        password = request.form.get('password', '')
-        
-        # Проверяем наличие необходимых параметров
-        if not book_url:
-            return jsonify({"status": "error", "message": "Необходимо указать URL книги"})
-            
-        # Получаем дополнительные параметры
-        try:
-            max_pages = int(request.form.get('max_pages', 50))
-        except ValueError:
-            return jsonify({"status": "error", "message": "Неверный формат максимального количества страниц"})
-            
-        # Запускаем облегченный скрапер в отдельном потоке
-        threading.Thread(
-            target=run_light_scraper,
-            args=(book_url, output_file, email, password, max_pages)
         ).start()
     
     else:
