@@ -8,6 +8,7 @@ from kindle_scraper import KindleScraper
 from kindle_api_scraper import KindleAPIScraper
 from kindle_web_scraper import KindleWebScraper
 from kindle_auto_api_scraper import KindleAutoAPIScraper
+from kindle_api_scraper_enhanced import KindleAPIScraperEnhanced
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
@@ -258,6 +259,11 @@ def test_auto_api_scraper():
     """Тестовая страница для автоматического API скрапера"""
     return render_template('auto_api_scraper.html')
 
+@app.route('/test_enhanced_api_scraper')
+def test_enhanced_api_scraper():
+    """Тестовая страница для улучшенного API скрапера с поддержкой изображений"""
+    return render_template('enhanced_api_scraper.html')
+
 def run_auto_api_scraper(book_url, output_file, email=None, password=None, page_load_time=5):
     """Функция для запуска автоматического API скрапера в отдельном потоке"""
     try:
@@ -409,6 +415,134 @@ def run_web_scraper(book_url, output_file, email=None, password=None, page_count
     finally:
         scraper_status["running"] = False
 
+def run_enhanced_api_scraper(book_url, output_file, email=None, password=None, images_dir=None, max_pages=20, page_load_time=5):
+    """Функция для запуска улучшенного API скрапера с поддержкой изображений в отдельном потоке"""
+    try:
+        scraper_status["running"] = True
+        scraper_status["progress"] = 0
+        scraper_status["total_pages"] = max_pages
+        scraper_status["current_page"] = 0
+        scraper_status["log_messages"] = []
+        
+        log_handler("Запуск улучшенного API парсера для книги с поддержкой изображений")
+        
+        # Создаем экземпляр улучшенного API скрапера
+        scraper = KindleAPIScraperEnhanced(
+            email=email,
+            password=password,
+            book_url=book_url,
+            output_file=output_file,
+            images_dir=images_dir if images_dir else "kindle_images",
+            page_load_time=page_load_time,
+            max_pages=max_pages
+        )
+        
+        # Устанавливаем обработчик обновления статуса
+        def update_status_callback(current_page, total_pages):
+            scraper_status["current_page"] = current_page
+            scraper_status["total_pages"] = max(total_pages, max_pages)
+            # Вычисляем прогресс на основе текущей страницы
+            progress = min(100, int((current_page / max_pages) * 100))
+            scraper_status["progress"] = progress
+            
+        # Устанавливаем колбэк для отслеживания прогресса
+        scraper.current_page_callback = update_status_callback
+        
+        # Показываем информацию о параметрах запуска
+        log_handler(f"Обработка книги по URL: {book_url}")
+        if email:
+            log_handler(f"Авторизация с учетной записью: {email}")
+        
+        # Показываем информацию о ASIN книги
+        asin = scraper.asin
+        if asin:
+            log_handler(f"Обнаружен ASIN книги: {asin}")
+        else:
+            log_handler(f"ASIN книги не найден, будет использоваться полный URL")
+            
+        log_handler(f"Изображения будут сохранены в директорию: {images_dir if images_dir else 'kindle_images'}")
+        
+        # Засекаем время начала обработки
+        start_time = time.time()
+        
+        # Запускаем процесс извлечения
+        success = scraper.run()
+        
+        # Засекаем время окончания обработки
+        end_time = time.time()
+        processing_time = end_time - start_time
+        
+        if success:
+            scraper_status["progress"] = 100
+            log_handler(f"Процесс успешно завершен")
+            log_handler(f"Текст сохранен в файл: {output_file}")
+            
+            # Сообщаем о сохранении структурированного JSON
+            json_file = output_file.replace('.txt', '.json')
+            log_handler(f"Структурированные данные сохранены в файл: {json_file}")
+            
+            # Сообщаем о извлеченных изображениях
+            if hasattr(scraper, 'images') and scraper.images:
+                log_handler(f"Извлечено изображений: {len(scraper.images)}")
+                for idx, img in enumerate(scraper.images[:5]):  # Показываем только первые 5 изображений в логе
+                    if 'fileName' in img:
+                        log_handler(f"Сохранено изображение: {img['fileName']}")
+                
+                if len(scraper.images) > 5:
+                    log_handler(f"... и еще {len(scraper.images) - 5} изображений")
+            
+            # Выводим информацию о книге
+            if hasattr(scraper, 'structured_content') and scraper.structured_content:
+                if "result" in scraper.structured_content:
+                    result = scraper.structured_content["result"]
+                    if "title" in result and result["title"]:
+                        log_handler(f"Название книги: {result['title']}")
+                    if "author" in result and result["author"]:
+                        log_handler(f"Автор: {result['author']}")
+                    if "content" in result and isinstance(result["content"], list):
+                        log_handler(f"Извлечено страниц текста: {len(result['content'])}")
+            
+            log_handler(f"Время обработки: {processing_time:.2f} секунд")
+        else:
+            log_handler("Ошибка при извлечении контента с помощью улучшенного API-парсера")
+            
+    except Exception as e:
+        log_handler(f"Ошибка в процессе улучшенного API-скрапинга: {str(e)}")
+    finally:
+        scraper_status["running"] = False
+
+@app.route('/start_enhanced_scraping', methods=['POST'])
+def start_enhanced_scraping():
+    """Запуск улучшенного API-парсера с поддержкой изображений"""
+    if scraper_status["running"]:
+        return jsonify({"status": "error", "message": "Процесс уже запущен"})
+    
+    # Получаем параметры из формы
+    book_url = request.form.get('book_url', '')
+    output_file = request.form.get('output_file', 'kindle_enhanced_book.txt')
+    email = request.form.get('email', '')
+    password = request.form.get('password', '')
+    images_dir = request.form.get('images_dir', 'kindle_images')
+    
+    # Проверяем наличие всех необходимых параметров
+    if not book_url or not email or not password:
+        return jsonify({"status": "error", "message": "Необходимо указать URL книги и учетные данные Amazon"})
+        
+    # Получаем дополнительные параметры
+    try:
+        max_pages = int(request.form.get('max_pages', 20))
+        page_load_time = float(request.form.get('page_load_time', 5))
+    except ValueError:
+        return jsonify({"status": "error", "message": "Неверный формат параметров"})
+        
+    # Запускаем улучшенный API-скрапер в отдельном потоке
+    threading.Thread(
+        target=run_enhanced_api_scraper,
+        args=(book_url, output_file, email, password, images_dir, max_pages, page_load_time)
+    ).start()
+    
+    return jsonify({"status": "success", "message": "Процесс запущен"})
+
 @app.route('/start_scraping', methods=['POST'])
 def start_scraping():
     """Запуск процесса скрапинга"""
@@ -516,6 +650,31 @@ def start_scraping():
         threading.Thread(
             target=run_auto_api_scraper,
             args=(book_url, output_file, email, password, page_load_time)
+        ).start()
+    
+    elif method == 'enhanced_api':
+        # Получаем параметры для улучшенного API-скрапера
+        book_url = request.form.get('book_url', '')
+        output_file = request.form.get('output_file', 'kindle_enhanced_book.txt')
+        email = request.form.get('email', '')
+        password = request.form.get('password', '')
+        images_dir = request.form.get('images_dir', 'kindle_images')
+        
+        # Проверяем наличие всех необходимых параметров
+        if not book_url or not email or not password:
+            return jsonify({"status": "error", "message": "Необходимо указать URL книги и учетные данные Amazon"})
+            
+        # Получаем дополнительные параметры
+        try:
+            max_pages = int(request.form.get('max_pages', 20))
+            page_load_time = float(request.form.get('page_load_time', 5))
+        except ValueError:
+            return jsonify({"status": "error", "message": "Неверный формат параметров"})
+            
+        # Запускаем улучшенный API-скрапер в отдельном потоке
+        threading.Thread(
+            target=run_enhanced_api_scraper,
+            args=(book_url, output_file, email, password, images_dir, max_pages, page_load_time)
         ).start()
     
     else:
