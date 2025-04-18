@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kindle Auto API Scraper</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        
+        .card {
+            margin-bottom: 20px;
+        }
+        
+        .log-container {
+            height: 400px;
+            overflow-y: auto;
+            background-color: var(--bs-dark);
+            border-radius: 5px;
+            padding: 10px;
+        }
+        
+        .log-content {
+            color: var(--bs-light);
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--bs-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <h1>Kindle Auto API Scraper</h1>
+                <p class="lead">Автоматический парсер книг из Kindle Cloud Reader с использованием перехвата API</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Настройки парсера</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="autoApiScraperForm">
+                            <input type="hidden" name="method" value="auto_api">
+                            
+                            <div class="mb-3">
+                                <p class="alert alert-success">
+                                    <strong>Автоматический API-парсер</strong> комбинирует преимущества Selenium и API-подхода:
+                                    <ul>
+                                        <li>Автоматически авторизуется на Amazon</li>
+                                        <li>Открывает книгу в Kindle Cloud Reader</li>
+                                        <li>Перехватывает и анализирует API-ответы</li>
+                                        <li>Извлекает структурированный текст и метаданные</li>
+                                    </ul>
+                                </p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="book_url" class="form-label">URL книги в Kindle Cloud Reader</label>
+                                <input type="url" class="form-control" id="book_url" name="book_url" placeholder="https://read.amazon.com/..." required>
+                                <div class="form-text">Например: https://read.amazon.com/?asin=B009SE1Z9E</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email для входа в Amazon</label>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="your.email@example.com" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Пароль для входа в Amazon</label>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Ваш пароль" required>
+                                <div class="form-text">Учетные данные необходимы для авторизации и доступа к содержимому книги</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="page_load_time" class="form-label">Время ожидания загрузки страницы (сек)</label>
+                                <input type="number" class="form-control" id="page_load_time" name="page_load_time" value="5" min="1" max="20">
+                                <div class="form-text">Увеличьте время для медленного соединения</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="output_file" class="form-label">Имя файла для сохранения</label>
+                                <input type="text" class="form-control" id="output_file" name="output_file" value="kindle_auto_book.txt" required>
+                                <div class="form-text">Результат также будет сохранен в JSON формате в файле с расширением .json</div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary" id="startButton">Запустить Auto API парсер</button>
+                                <button type="button" class="btn btn-danger" id="stopButton" disabled>Остановить</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h2 class="card-title">Навигация</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/" class="btn btn-secondary">Главная страница</a>
+                            <a href="/test_api_scraper" class="btn btn-secondary">API парсер (с файлом)</a>
+                            <a href="/test_web_scraper" class="btn btn-secondary">Веб-парсер</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h2 class="card-title">Статус</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="statusSection">
+                            <div class="alert alert-info" id="statusMessage">
+                                Парсер не запущен
+                            </div>
+                            
+                            <div class="progress mb-3" style="display: none;" id="progressContainer">
+                                <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <p>Обработка: <span id="currentPage">0</span> из <span id="totalPages">0</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Лог</h2>
+                        <button type="button" class="btn btn-sm btn-secondary float-end" id="clearLogButton">Очистить</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="log-container">
+                            <pre id="logContainer" class="log-content"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Преимущества автоматического API-парсера</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-4">
+                                <div class="text-center mb-3">
+                                    <span class="feature-icon">🔍</span>
+                                </div>
+                                <h3 class="text-center">Автоматическое извлечение</h3>
+                                <p>Парсер самостоятельно авторизуется, открывает книгу и извлекает структурированный текст без ручного вмешательства.</p>
+                            </div>
+                            
+                            <div class="col-md-4 mb-4">
+                                <div class="text-center mb-3">
+                                    <span class="feature-icon">📊</span>
+                                </div>
+                                <h3 class="text-center">Структурированные данные</h3>
+                                <p>Извлекает не только текст, но и метаданные книги: название, автор, структура глав и номера страниц.</p>
+                            </div>
+                            
+                            <div class="col-md-4 mb-4">
+                                <div class="text-center mb-3">
+                                    <span class="feature-icon">⚙️</span>
+                                </div>
+                                <h3 class="text-center">Гибкость и надежность</h3>
+                                <p>Комбинирует API-подход и резервные методы извлечения. Подстраивается под различные форматы книг.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="pt-3 mt-4 text-muted border-top">
+            &copy; 2023 Kindle Auto API Scraper
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const autoApiScraperForm = document.getElementById('autoApiScraperForm');
+            const startButton = document.getElementById('startButton');
+            const stopButton = document.getElementById('stopButton');
+            const statusMessage = document.getElementById('statusMessage');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const currentPage = document.getElementById('currentPage');
+            const totalPages = document.getElementById('totalPages');
+            const logContainer = document.getElementById('logContainer');
+            const clearLogButton = document.getElementById('clearLogButton');
+            
+            let isRunning = false;
+            let statusInterval = null;
+            
+            // Функция обновления статуса
+            function updateStatus() {
+                fetch('/get_status')
+                    .then(response => response.json())
+                    .then(data => {
+                        isRunning = data.running;
+                        
+                        if (isRunning) {
+                            statusMessage.textContent = "Парсер запущен";
+                            statusMessage.className = "alert alert-success";
+                            startButton.disabled = true;
+                            stopButton.disabled = false;
+                            progressContainer.style.display = 'block';
+                            
+                            // Обновляем прогресс
+                            const progress = data.progress;
+                            progressBar.style.width = `${progress}%`;
+                            progressBar.textContent = `${progress}%`;
+                            progressBar.setAttribute('aria-valuenow', progress);
+                            
+                            // Обновляем счетчик страниц
+                            currentPage.textContent = data.current_page;
+                            totalPages.textContent = data.total_pages;
+                            
+                            // Добавляем сообщения лога
+                            if (data.log_messages && data.log_messages.length > 0) {
+                                logContainer.innerHTML = data.log_messages.join('<br>');
+                                // Прокручиваем к последнему сообщению
+                                logContainer.scrollTop = logContainer.scrollHeight;
+                            }
+                        } else {
+                            statusMessage.textContent = "Парсер не запущен";
+                            statusMessage.className = "alert alert-info";
+                            startButton.disabled = false;
+                            stopButton.disabled = true;
+                            
+                            // Если был запущен, но остановился, значит процесс завершен
+                            if (data.current_page > 0) {
+                                statusMessage.textContent = "Процесс завершен";
+                                statusMessage.className = "alert alert-success";
+                            }
+                            
+                            // Останавливаем интервал, если процесс завершен
+                            if (statusInterval && !isRunning) {
+                                clearInterval(statusInterval);
+                                statusInterval = null;
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при получении статуса:', error);
+                    });
+            }
+            
+            // Обработчик отправки формы
+            autoApiScraperForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                const formData = new FormData(autoApiScraperForm);
+                
+                fetch('/start_scraping', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Запускаем интервал обновления статуса
+                        if (!statusInterval) {
+                            statusInterval = setInterval(updateStatus, 1000);
+                        }
+                        
+                        // Сразу обновляем статус
+                        updateStatus();
+                    } else {
+                        // Выводим сообщение об ошибке
+                        statusMessage.textContent = data.message;
+                        statusMessage.className = "alert alert-danger";
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при запуске парсера:', error);
+                    statusMessage.textContent = "Произошла ошибка при запуске парсера";
+                    statusMessage.className = "alert alert-danger";
+                });
+            });
+            
+            // Обработчик кнопки остановки
+            stopButton.addEventListener('click', function() {
+                fetch('/stop_scraping')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            statusMessage.textContent = "Процесс остановлен";
+                            statusMessage.className = "alert alert-warning";
+                            startButton.disabled = false;
+                            stopButton.disabled = true;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при остановке парсера:', error);
+                    });
+            });
+            
+            // Обработчик кнопки очистки лога
+            clearLogButton.addEventListener('click', function() {
+                logContainer.innerHTML = '';
+            });
+            
+            // Начальное обновление статуса
+            updateStatus();
+        });
+    </script>
+</body>
+</html>

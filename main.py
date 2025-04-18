@@ -7,6 +7,7 @@ import json
 from kindle_scraper import KindleScraper
 from kindle_api_scraper import KindleAPIScraper
 from kindle_web_scraper import KindleWebScraper
+from kindle_auto_api_scraper import KindleAutoAPIScraper
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
@@ -252,6 +253,92 @@ def test_web_scraper():
     """Тестовая страница для веб-скрапера"""
     return render_template('web_scraper.html')
 
+@app.route('/test_auto_api_scraper')
+def test_auto_api_scraper():
+    """Тестовая страница для автоматического API скрапера"""
+    return render_template('auto_api_scraper.html')
+
+def run_auto_api_scraper(book_url, output_file, email=None, password=None, page_load_time=5):
+    """Функция для запуска автоматического API скрапера в отдельном потоке"""
+    try:
+        scraper_status["running"] = True
+        scraper_status["progress"] = 0
+        scraper_status["total_pages"] = 10  # Предполагаемое количество страниц для начала
+        scraper_status["current_page"] = 0
+        scraper_status["log_messages"] = []
+        
+        log_handler("Запуск автоматического API парсера для книги")
+        
+        # Создаем экземпляр автоматического API скрапера
+        scraper = KindleAutoAPIScraper(
+            email=email,
+            password=password,
+            book_url=book_url,
+            output_file=output_file,
+            page_load_time=page_load_time
+        )
+        
+        # Устанавливаем обработчик обновления текущей страницы
+        def update_status_callback(current_page, total_pages):
+            scraper_status["current_page"] = current_page
+            scraper_status["total_pages"] = total_pages
+            # Вычисляем прогресс на основе текущей страницы
+            progress = min(100, int((current_page / total_pages) * 100))
+            scraper_status["progress"] = progress
+            
+        # Привязываем обработчик к скраперу
+        scraper.current_page_callback = update_status_callback
+        
+        # Запуск скрапера с отслеживанием прогресса
+        log_handler(f"Обработка книги по URL: {book_url}")
+        if email:
+            log_handler(f"Авторизация с учетной записью: {email}")
+        
+        # Показываем информацию о ASIN книги
+        asin = scraper.asin
+        if asin:
+            log_handler(f"Обнаружен ASIN книги: {asin}")
+        else:
+            log_handler(f"ASIN книги не найден, будет использоваться полный URL")
+        
+        # Засекаем время начала обработки
+        start_time = time.time()
+        
+        # Запускаем процесс извлечения
+        success = scraper.run()
+        
+        # Засекаем время окончания обработки
+        end_time = time.time()
+        processing_time = end_time - start_time
+        
+        if success:
+            # Обновляем прогресс до 100%
+            scraper_status["progress"] = 100
+            log_handler(f"Текст успешно извлечен и сохранен в файл: {output_file}")
+            log_handler(f"Время обработки: {processing_time:.2f} секунд")
+            
+            # Сообщаем о сохранении структурированного JSON
+            json_file = output_file.replace('.txt', '.json')
+            log_handler(f"Структурированные данные сохранены в файл: {json_file}")
+            
+            # Выводим информацию о книге
+            if hasattr(scraper, 'structured_content') and scraper.structured_content:
+                if "result" in scraper.structured_content:
+                    result = scraper.structured_content["result"]
+                    if "title" in result and result["title"]:
+                        log_handler(f"Название книги: {result['title']}")
+                    if "author" in result and result["author"]:
+                        log_handler(f"Автор: {result['author']}")
+                    if "content" in result and isinstance(result["content"], list):
+                        log_handler(f"Извлечено страниц: {len(result['content'])}")
+        else:
+            log_handler("Ошибка при извлечении текста с помощью Auto API-парсера")
+            
+    except Exception as e:
+        log_handler(f"Ошибка в процессе автоматического API-скрапинга: {str(e)}")
+    finally:
+        scraper_status["running"] = False
+
 def run_web_scraper(book_url, output_file, email=None, password=None, page_count=50, auto_paginate=True):
     """Функция для запуска веб-скрапера в отдельном потоке"""
     try:
@@ -406,6 +493,29 @@ def start_scraping():
         threading.Thread(
             target=run_web_scraper,
             args=(book_url, output_file, email, password, page_count, auto_paginate)
+        ).start()
+        
+    elif method == 'auto_api':
+        # Получаем параметры для автоматического API-скрапера
+        book_url = request.form.get('book_url', '')
+        output_file = request.form.get('output_file', 'kindle_auto_book.txt')
+        email = request.form.get('email', '')
+        password = request.form.get('password', '')
+        
+        # Проверяем наличие всех необходимых параметров
+        if not book_url or not email or not password:
+            return jsonify({"status": "error", "message": "Необходимо указать URL книги и учетные данные Amazon"})
+            
+        # Получаем время ожидания загрузки страницы
+        try:
+            page_load_time = float(request.form.get('page_load_time', 5))
+        except ValueError:
+            return jsonify({"status": "error", "message": "Неверный формат времени ожидания"})
+            
+        # Запускаем автоматический API-скрапер в отдельном потоке
+        threading.Thread(
+            target=run_auto_api_scraper,
+            args=(book_url, output_file, email, password, page_load_time)
         ).start()
     
     else:
