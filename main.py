@@ -356,22 +356,28 @@ def start_scraping():
     
     elif method == 'api':
         # Получаем параметры для API скрапера
-        book_url = request.form.get('book_url', '')
         output_file = request.form.get('output_file', 'kindle_api_book.txt')
-        email = request.form.get('email', '')
-        password = request.form.get('password', '')
+        use_response_file = request.form.get('useResponseFile', 'on') == 'on'
         
-        # Если URL не предоставлен, используем тестовый файл
-        if not book_url:
+        if use_response_file:
+            # Используем предопределенный файл с примером ответа API
             response_file = 'sample_kindle_response.json'
-            # Используем логгер без изменения глобальных переменных в основном потоке
-            logging.info(f"URL книги не указан, используем тестовый файл: {response_file}")
+            logging.info(f"Используем предопределенный файл: {response_file}")
+            
             # Запускаем API скрапер в отдельном потоке с тестовым файлом
             threading.Thread(
                 target=run_api_scraper,
                 args=(response_file, output_file, None, None, None)
             ).start()
         else:
+            # Прямое API-парсинг (для будущего развития)
+            book_url = request.form.get('book_url', '')
+            email = request.form.get('email', '')
+            password = request.form.get('password', '')
+            
+            if not book_url:
+                return jsonify({"status": "error", "message": "URL книги не указан"})
+                
             # Запускаем API скрапер в отдельном потоке с URL и учетными данными
             threading.Thread(
                 target=run_api_scraper,
