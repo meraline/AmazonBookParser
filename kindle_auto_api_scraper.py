@@ -9,6 +9,7 @@ import re
 import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
@@ -535,6 +536,7 @@ class KindleAutoAPIScraper:
             return []
 
     @log_function_call(parsing_logger)
+    @log_function_call(selenium_logger)
     def navigate_with_screenshots(self):
         """
         Перелистывает страницы книги и делает скриншот каждой страницы
@@ -568,7 +570,6 @@ class KindleAutoAPIScraper:
                 # Перелистываем на следующую страницу
                 try:
                     # Находим body и отправляем ARROW_RIGHT для перелистывания
-                    from selenium.webdriver.common.keys import Keys
                     body = self.driver.find_element(By.TAG_NAME, "body")
                     body.send_keys(Keys.ARROW_RIGHT)
                     
@@ -1036,6 +1037,12 @@ class KindleAutoAPIScraper:
                 self.cleanup()
                 return False
                 
+            # Создаем скриншоты страниц книги и перелистываем страницы
+            selenium_logger.info("Создаем скриншоты страниц книги")
+            if not self.navigate_with_screenshots():
+                selenium_logger.warning("Не удалось создать скриншоты страниц книги")
+                # Продолжаем выполнение, так как это не критическая ошибка
+            
             # Перехватываем сетевой трафик
             selenium_logger.info("Перехватываем сетевой трафик")
             api_responses = self.capture_network_traffic()
