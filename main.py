@@ -6,6 +6,7 @@ import logging
 import json
 from kindle_scraper import KindleScraper
 from kindle_api_scraper import KindleAPIScraper
+from kindle_web_scraper import KindleWebScraper
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
@@ -194,6 +195,51 @@ def test_api_scraper():
     """Тестовая страница для API скрапера"""
     return render_template('api_scraper.html')
 
+@app.route('/test_web_scraper')
+def test_web_scraper():
+    """Тестовая страница для веб-скрапера"""
+    return render_template('web_scraper.html')
+
+def run_web_scraper(book_url, output_file):
+    """Функция для запуска веб-скрапера в отдельном потоке"""
+    try:
+        scraper_status["running"] = True
+        scraper_status["progress"] = 0
+        scraper_status["total_pages"] = 1  # Одна операция извлечения
+        scraper_status["current_page"] = 0
+        scraper_status["log_messages"] = []
+        
+        log_handler("Запуск процесса извлечения текста через веб-скрапер")
+        
+        # Создаем экземпляр веб-скрапера
+        scraper = KindleWebScraper(book_url=book_url, output_file=output_file)
+        
+        # Запускаем извлечение
+        log_handler(f"Попытка извлечения текста из URL: {book_url}")
+        scraper_status["progress"] = 10
+        
+        # Пробуем получить ASIN книги
+        if scraper.asin:
+            log_handler(f"Обнаружен ASIN книги: {scraper.asin}")
+        else:
+            log_handler("ASIN книги не найден, используем полный URL")
+        
+        scraper_status["progress"] = 30
+        log_handler("Попытка прямого извлечения контента...")
+        
+        success = scraper.run()
+        
+        scraper_status["progress"] = 100
+        if success:
+            log_handler(f"Текст успешно извлечен и сохранен в файл: {output_file}")
+        else:
+            log_handler("Ошибка при извлечении текста из веб-страницы")
+        
+    except Exception as e:
+        log_handler(f"Ошибка в процессе веб-скрапинга: {str(e)}")
+    finally:
+        scraper_status["running"] = False
+
 @app.route('/start_scraping', methods=['POST'])
 def start_scraping():
     """Запуск процесса скрапинга"""
@@ -229,13 +275,28 @@ def start_scraping():
     elif method == 'api':
         # Получаем параметры для API скрапера
         # В нашем тестовом случае используем предопределенный файл
-        response_file = 'sample_kindle_response.json'
+        response_file = request.form.get('response_file', 'sample_kindle_response.json')
         output_file = request.form.get('output_file', 'kindle_api_book.txt')
         
         # Запускаем API скрапер в отдельном потоке
         threading.Thread(
             target=run_api_scraper,
             args=(response_file, output_file)
+        ).start()
+    
+    elif method == 'web':
+        # Получаем параметры для веб-скрапера
+        book_url = request.form.get('book_url', '')
+        output_file = request.form.get('output_file', 'kindle_web_book.txt')
+        
+        # Проверяем наличие URL
+        if not book_url:
+            return jsonify({"status": "error", "message": "URL книги не указан"})
+        
+        # Запускаем веб-скрапер в отдельном потоке
+        threading.Thread(
+            target=run_web_scraper,
+            args=(book_url, output_file)
         ).start()
     
     else:
