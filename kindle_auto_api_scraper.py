@@ -14,11 +14,21 @@ from selenium.webdriver.firefox.service import Service
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from webdriver_manager.firefox import GeckoDriverManager
 
+# Импортируем расширенное логирование
+from debug_utils import (
+    selenium_logger,
+    api_logger, 
+    parsing_logger,
+    log_function_call,
+    log_page_content,
+    log_screenshot,
+    log_parsed_content
+)
 
-# Настраиваем логирование
+# Настраиваем базовое логирование
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    level=logging.DEBUG,  # Повышаем уровень детализации
+    format='%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s',
     filename='kindle_auto_scraper.log'
 )
 
@@ -27,6 +37,9 @@ console_handler.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 console_handler.setFormatter(formatter)
 logging.getLogger('').addHandler(console_handler)
+
+# Логируем запуск модуля
+selenium_logger.info("Модуль kindle_auto_api_scraper инициализирован")
 
 class KindleAutoAPIScraper:
     def __init__(self, email=None, password=None, book_url=None, output_file="kindle_auto_book.txt", page_load_time=5, max_wait_time=30):
@@ -128,6 +141,7 @@ class KindleAutoAPIScraper:
             logging.error(f"Ошибка при настройке веб-драйвера: {str(e)}")
             return False
 
+    @log_function_call(selenium_logger)
     def login(self):
         """
         Авторизация на сайте Amazon
@@ -135,12 +149,16 @@ class KindleAutoAPIScraper:
         :return: True если авторизация прошла успешно, иначе False
         """
         if not self.email or not self.password:
-            logging.warning("Email или пароль не указаны, авторизация невозможна")
+            selenium_logger.warning("Email или пароль не указаны, авторизация невозможна")
             return False
             
         try:
-            logging.info("Открываем страницу авторизации Amazon")
+            selenium_logger.info("Открываем страницу авторизации Amazon")
             self.driver.get("https://www.amazon.com/ap/signin")
+            
+            # Сохраняем страницу до авторизации для отладки
+            log_page_content(self.driver, "login_page_before")
+            log_screenshot(self.driver, "login_page_before")
             
             # Ждем загрузки страницы
             WebDriverWait(self.driver, self.max_wait_time).until(
@@ -148,10 +166,13 @@ class KindleAutoAPIScraper:
             )
             
             # Вводим email
-            logging.info(f"Вводим email: {self.email}")
+            selenium_logger.info(f"Вводим email: {self.email}")
             email_field = self.driver.find_element(By.ID, "ap_email")
             email_field.clear()
             email_field.send_keys(self.email)
+            
+            # Логируем состояние после ввода email
+            log_screenshot(self.driver, "after_email_entry")
             
             # Нажимаем кнопку "Continue"
             continue_button = self.driver.find_element(By.ID, "continue")
@@ -162,8 +183,11 @@ class KindleAutoAPIScraper:
                 EC.presence_of_element_located((By.ID, "ap_password"))
             )
             
+            # Логируем состояние страницы пароля
+            log_screenshot(self.driver, "password_page")
+            
             # Вводим пароль
-            logging.info("Вводим пароль")
+            selenium_logger.info("Вводим пароль")
             password_field = self.driver.find_element(By.ID, "ap_password")
             password_field.clear()
             password_field.send_keys(self.password)
@@ -177,15 +201,27 @@ class KindleAutoAPIScraper:
                 WebDriverWait(self.driver, self.max_wait_time).until(
                     lambda driver: "amazon.com" in driver.current_url and "ap/signin" not in driver.current_url
                 )
-                logging.info("Авторизация прошла успешно")
+                
+                # Логируем состояние после авторизации
+                log_screenshot(self.driver, "after_login_success")
+                log_page_content(self.driver, "after_login_page")
+                
+                selenium_logger.info("Авторизация прошла успешно")
                 return True
                 
             except TimeoutException:
-                logging.error("Ошибка авторизации. Проверьте учетные данные.")
+                # Логируем неудачную авторизацию
+                log_screenshot(self.driver, "login_failure")
+                log_page_content(self.driver, "login_failure_page")
+                
+                selenium_logger.error("Ошибка авторизации. Проверьте учетные данные.")
                 return False
                 
         except Exception as e:
-            logging.error(f"Ошибка при авторизации: {str(e)}")
+            # Логируем ошибку
+            log_screenshot(self.driver, "login_exception")
+            selenium_logger.error(f"Ошибка при авторизации: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
             return False
 
     def open_kindle_cloud_reader(self):
