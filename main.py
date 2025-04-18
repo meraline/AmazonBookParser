@@ -4,6 +4,7 @@ import threading
 import time
 import logging
 import json
+import traceback
 from kindle_scraper import KindleScraper
 from kindle_api_scraper import KindleAPIScraper
 from kindle_web_scraper import KindleWebScraper
@@ -764,6 +765,29 @@ def start_scraping():
         threading.Thread(
             target=run_enhanced_api_scraper,
             args=(book_url, output_file, email, password, images_dir, max_pages, page_load_time)
+        ).start()
+        
+    elif method == 'light':
+        # Получаем параметры для облегченного скрапера
+        book_url = request.form.get('book_url', '')
+        output_file = request.form.get('output_file', 'kindle_light_book.txt')
+        email = request.form.get('email', '')
+        password = request.form.get('password', '')
+        
+        # Проверяем наличие необходимых параметров
+        if not book_url:
+            return jsonify({"status": "error", "message": "Необходимо указать URL книги"})
+            
+        # Получаем дополнительные параметры
+        try:
+            max_pages = int(request.form.get('max_pages', 50))
+        except ValueError:
+            return jsonify({"status": "error", "message": "Неверный формат максимального количества страниц"})
+            
+        # Запускаем облегченный скрапер в отдельном потоке
+        threading.Thread(
+            target=run_light_scraper,
+            args=(book_url, output_file, email, password, max_pages)
         ).start()
     
     else:
