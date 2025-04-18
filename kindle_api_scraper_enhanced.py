@@ -126,15 +126,21 @@ class KindleAPIScraperEnhanced:
     @log_function_call(selenium_logger)
     def setup_driver(self):
         """
-        Настройка Firefox для работы с Kindle Cloud Reader
+        Настройка Firefox для работы с Kindle Cloud Reader в безголовом режиме
         """
         try:
-            selenium_logger.info("Настраиваем Firefox для работы с Kindle Cloud Reader")
+            selenium_logger.info("Настраиваем Firefox в безголовом режиме для работы с Kindle Cloud Reader")
             
-            # Настраиваем опции Firefox
+            # Настраиваем опции Firefox для безголового режима
             options = Options()
+            
+            # Принудительно включаем безголовый режим для Replit
+            options.add_argument("--headless")
             options.add_argument("--width=1366")
             options.add_argument("--height=768")
+            options.add_argument("--disable-gpu")
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-dev-shm-usage")
             
             # Настраиваем Firefox для логирования
             options.set_preference("devtools.console.stdout.content", True)
@@ -143,15 +149,26 @@ class KindleAPIScraperEnhanced:
             options.set_preference("browser.cache.offline.enable", False)
             options.set_preference("network.http.use-cache", False)
             
-            # Инициализируем драйвер
+            # Дополнительные настройки для производительности
+            options.set_preference("javascript.enabled", True)
+            options.set_preference("dom.ipc.plugins.enabled", False)
+            options.set_preference("dom.disable_open_during_load", False)
+            options.set_preference("permissions.default.image", 2)  # Блокируем загрузку изображений для ускорения
+            
+            selenium_logger.info("Устанавливаем GeckoDriver с увеличенным таймаутом")
+            
+            # Инициализируем драйвер с увеличенными таймаутами
             service = Service(GeckoDriverManager().install())
+            service.connection_timeout = 180  # Увеличиваем таймаут подключения до 180 секунд
+            
+            selenium_logger.info("Запускаем WebDriver")
             self.driver = webdriver.Firefox(service=service, options=options)
             
-            # Сохраняем скриншот для подтверждения запуска
-            try:
-                log_screenshot(self.driver, "firefox_started")
-            except Exception as screenshot_err:
-                selenium_logger.warning(f"Не удалось сохранить скриншот запуска: {str(screenshot_err)}")
+            # Устанавливаем глобальные таймауты
+            self.driver.set_page_load_timeout(120)
+            self.driver.implicitly_wait(30)
+            
+            selenium_logger.info("Firefox успешно запущен в безголовом режиме")
             
             # Устанавливаем скрипт для перехвата запросов
             self.setup_request_interceptor()
@@ -350,6 +367,7 @@ class KindleAPIScraperEnhanced:
             log_screenshot(self.driver, "login_exception")
             return False
 
+    @log_function_call(selenium_logger)
     def open_kindle_cloud_reader(self):
         """
         Открывает Kindle Cloud Reader
@@ -357,30 +375,53 @@ class KindleAPIScraperEnhanced:
         :return: True если открытие прошло успешно, иначе False
         """
         if not self.driver:
-            logging.error("Драйвер не инициализирован")
+            selenium_logger.error("Драйвер не инициализирован")
             return False
             
         try:
-            logging.info("Открываем Kindle Cloud Reader")
+            selenium_logger.info("Открываем Kindle Cloud Reader")
             self.driver.get("https://read.amazon.com")
             
-            # Ждем загрузки страницы
-            WebDriverWait(self.driver, 20).until(
+            # Сохраняем скриншот начальной страницы
+            log_screenshot(self.driver, "kindle_cloud_reader_initial")
+            log_page_content(self.driver, "kindle_cloud_reader_initial")
+            
+            # Ждем загрузки страницы с увеличенным таймаутом
+            selenium_logger.info("Ожидаем загрузку страницы Kindle Cloud Reader")
+            WebDriverWait(self.driver, 60).until(
                 lambda driver: "read.amazon.com" in driver.current_url
             )
             
             # Проверяем, не перенаправило ли нас на страницу авторизации
             if "ap/signin" in self.driver.current_url:
-                logging.info("Требуется авторизация")
+                selenium_logger.info("Требуется авторизация для Kindle Cloud Reader")
                 return self.login_to_amazon()
                 
-            logging.info("Kindle Cloud Reader успешно открыт")
+            # Даем странице время загрузиться полностью  
+            selenium_logger.info("Ожидаем полную загрузку интерфейса Kindle Cloud Reader")
+            time.sleep(5)
+            
+            # Сохраняем скриншот загруженной страницы
+            log_screenshot(self.driver, "kindle_cloud_reader_loaded")
+            log_page_content(self.driver, "kindle_cloud_reader_loaded")
+            
+            selenium_logger.info("Kindle Cloud Reader успешно открыт")
             return True
             
         except Exception as e:
-            logging.error(f"Ошибка при открытии Kindle Cloud Reader: {str(e)}")
+            selenium_logger.error(f"Ошибка при открытии Kindle Cloud Reader: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
+            
+            # В случае ошибки сохраняем состояние страницы
+            try:
+                log_screenshot(self.driver, "kindle_cloud_reader_error")
+                log_page_content(self.driver, "kindle_cloud_reader_error")
+            except:
+                selenium_logger.error("Не удалось сохранить скриншот ошибки")
+                
             return False
 
+    @log_function_call(selenium_logger)
     def open_book(self):
         """
         Открывает книгу по указанному URL или ASIN
@@ -388,11 +429,11 @@ class KindleAPIScraperEnhanced:
         :return: True если книга успешно открыта, иначе False
         """
         if not self.driver:
-            logging.error("Драйвер не инициализирован")
+            selenium_logger.error("Драйвер не инициализирован")
             return False
             
         if not self.book_url and not self.asin:
-            logging.error("Не указан URL книги или ASIN")
+            selenium_logger.error("Не указан URL книги или ASIN")
             return False
             
         try:
@@ -402,59 +443,166 @@ class KindleAPIScraperEnhanced:
             if not url_to_open and self.asin:
                 url_to_open = f"https://read.amazon.com/reader?asin={self.asin}"
                 
-            logging.info(f"Открываем книгу по URL: {url_to_open}")
+            selenium_logger.info(f"Открываем книгу по URL: {url_to_open}")
             self.driver.get(url_to_open)
             
-            # Ждем загрузки книги (проверяем, что URL содержит reader или kp)
-            WebDriverWait(self.driver, 20).until(
+            # Сохраняем скриншот начальной загрузки книги 
+            log_screenshot(self.driver, "book_loading_initial")
+            log_page_content(self.driver, "book_loading_initial")
+            
+            # Ждем загрузки книги с увеличенным таймаутом (проверяем, что URL содержит reader или kp)
+            selenium_logger.info("Ожидаем загрузки страницы книги")
+            WebDriverWait(self.driver, 60).until(
                 lambda driver: "read.amazon.com/reader" in driver.current_url or 
                               "read.amazon.com/kp" in driver.current_url
             )
             
+            selenium_logger.info("URL страницы книги определен, ожидаем загрузку интерфейса")
+            
             # Время на полную загрузку интерфейса
             time.sleep(self.page_load_time)
             
+            # Сохраняем скриншот загруженной книги
+            log_screenshot(self.driver, "book_loaded")
+            log_page_content(self.driver, "book_loaded")
+            
             # Извлекаем метаданные книги
+            selenium_logger.info("Извлекаем метаданные книги")
             self.extract_book_metadata()
             
-            logging.info("Книга успешно открыта")
+            selenium_logger.info("Книга успешно открыта")
             return True
             
         except Exception as e:
-            logging.error(f"Ошибка при открытии книги: {str(e)}")
+            selenium_logger.error(f"Ошибка при открытии книги: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
+            
+            # В случае ошибки сохраняем состояние страницы
+            try:
+                log_screenshot(self.driver, "book_opening_error")
+                log_page_content(self.driver, "book_opening_error")
+            except:
+                selenium_logger.error("Не удалось сохранить скриншот ошибки")
+            
             return False
 
+    @log_function_call(selenium_logger)
     def extract_book_metadata(self):
         """
         Извлекает метаданные книги (название, автор)
         """
         if not self.driver:
+            selenium_logger.error("Драйвер не инициализирован при извлечении метаданных")
             return
             
         try:
+            selenium_logger.info("Начинаем извлечение метаданных книги")
+            
+            # Сначала сохраняем состояние страницы для анализа
+            log_screenshot(self.driver, "book_metadata_extraction")
+            log_page_content(self.driver, "book_metadata_extraction")
+            
+            # Используем расширенный набор селекторов для поиска названия
+            title_selectors = [
+                ".bookTitle", 
+                ".book-title", 
+                "#ebookTitle", 
+                "#bookTitle", 
+                "h1.kindle-title",
+                ".title-text",
+                ".kindle-header-title"
+            ]
+            
             # Пытаемся найти название книги
             try:
-                title_element = WebDriverWait(self.driver, 5).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, ".bookTitle, .book-title"))
-                )
-                self.structured_content["result"]["title"] = title_element.text.strip()
-            except Exception:
-                logging.info("Не удалось найти название книги")
+                selenium_logger.info("Ищем название книги")
+                title_found = False
                 
+                for selector in title_selectors:
+                    try:
+                        selenium_logger.info(f"Проверяем селектор: {selector}")
+                        title_element = WebDriverWait(self.driver, 5).until(
+                            EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+                        )
+                        self.structured_content["result"]["title"] = title_element.text.strip()
+                        selenium_logger.info(f"Найдено название книги через селектор {selector}: {self.structured_content['result']['title']}")
+                        title_found = True
+                        break
+                    except Exception as selector_err:
+                        selenium_logger.debug(f"Селектор {selector} не найден: {str(selector_err)}")
+                        continue
+                
+                # Если не нашли через селекторы, попробуем извлечь из заголовка страницы
+                if not title_found:
+                    selenium_logger.info("Пробуем извлечь название из заголовка страницы")
+                    page_title = self.driver.title
+                    if page_title and "Amazon" in page_title:
+                        # Обычно формат: "Название книги - Kindle Reader"
+                        book_title = page_title.split(" - ")[0].strip()
+                        if book_title:
+                            self.structured_content["result"]["title"] = book_title
+                            selenium_logger.info(f"Извлечено название из заголовка: {book_title}")
+                            title_found = True
+                
+                # Если все равно не нашли, используем ASIN
+                if not title_found and self.asin:
+                    book_title = f"Book with ASIN: {self.asin}"
+                    self.structured_content["result"]["title"] = book_title
+                    selenium_logger.info(f"Используем ASIN как название: {book_title}")
+                
+            except Exception as title_err:
+                selenium_logger.warning(f"Не удалось найти название книги: {str(title_err)}")
+                
+            # Расширенный набор селекторов для поиска автора
+            author_selectors = [
+                ".bookAuthor", 
+                ".book-author", 
+                "#ebookAuthor", 
+                "#bookAuthor",
+                ".author-text",
+                ".kindle-header-author",
+                ".author-name"
+            ]
+            
             # Пытаемся найти автора книги
             try:
-                author_element = WebDriverWait(self.driver, 5).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, ".bookAuthor, .book-author"))
-                )
-                self.structured_content["result"]["author"] = author_element.text.strip()
-            except Exception:
-                logging.info("Не удалось найти автора книги")
+                selenium_logger.info("Ищем автора книги")
+                author_found = False
                 
-            logging.info(f"Извлечены метаданные книги: {self.structured_content['result']['title']} - {self.structured_content['result']['author']}")
+                for selector in author_selectors:
+                    try:
+                        selenium_logger.info(f"Проверяем селектор: {selector}")
+                        author_element = WebDriverWait(self.driver, 5).until(
+                            EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+                        )
+                        self.structured_content["result"]["author"] = author_element.text.strip()
+                        selenium_logger.info(f"Найден автор книги через селектор {selector}: {self.structured_content['result']['author']}")
+                        author_found = True
+                        break
+                    except Exception as selector_err:
+                        selenium_logger.debug(f"Селектор {selector} не найден: {str(selector_err)}")
+                        continue
+                
+                # Если не нашли через селекторы, пробуем альтернативные методы
+                if not author_found:
+                    selenium_logger.info("Не удалось найти автора через стандартные селекторы")
+                    self.structured_content["result"]["author"] = "Unknown Author"
+                
+            except Exception as author_err:
+                selenium_logger.warning(f"Не удалось найти автора книги: {str(author_err)}")
+                
+            selenium_logger.info(f"Извлечены метаданные книги: {self.structured_content['result']['title']} - {self.structured_content['result']['author']}")
+            
+            # Добавляем ASIN к метаданным
+            if self.asin:
+                self.structured_content["result"]["asin"] = self.asin
+                selenium_logger.info(f"Добавлен ASIN в метаданные: {self.asin}")
             
         except Exception as e:
-            logging.error(f"Ошибка при извлечении метаданных книги: {str(e)}")
+            selenium_logger.error(f"Ошибка при извлечении метаданных книги: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
 
+    @log_function_call(selenium_logger)
     def navigate_pages(self):
         """
         Перелистывает страницы и собирает контент
@@ -462,72 +610,212 @@ class KindleAPIScraperEnhanced:
         :return: True если успешно, иначе False
         """
         if not self.driver:
-            logging.error("Драйвер не инициализирован")
+            selenium_logger.error("Драйвер не инициализирован при навигации по страницам")
             return False
             
         try:
-            logging.info(f"Начинаем навигацию по страницам. Максимум страниц: {self.max_pages}")
+            selenium_logger.info(f"Начинаем навигацию по страницам. Максимум страниц: {self.max_pages}")
             
             # Устанавливаем счетчики
             self.current_page = 1
             
+            # Сохраняем скриншот перед началом навигации
+            log_screenshot(self.driver, "navigation_start")
+            
             # Ожидаем загрузку первой страницы
+            selenium_logger.info("Ожидаем загрузку первой страницы")
             time.sleep(self.page_load_time)
             
             # Извлекаем контент с первой страницы
+            selenium_logger.info("Извлекаем контент с первой страницы")
             self.extract_current_page_content()
+            
+            # Находим навигационные элементы (кнопки или области для перелистывания)
+            navigation_elements = self._find_navigation_elements()
             
             # Перелистываем страницы до достижения максимума
             for page_num in range(2, self.max_pages + 1):
-                logging.info(f"Перелистываем на страницу {page_num}")
+                selenium_logger.info(f"Перелистываем на страницу {page_num}")
                 
-                # Нажимаем на область справа для перехода на следующую страницу
+                # Сохраняем скриншот перед переходом на следующую страницу
+                log_screenshot(self.driver, f"before_page_{page_num}")
+                
+                # Нажимаем на область справа или кнопку "Следующая страница" для перехода на следующую страницу
                 try:
-                    # Нажимаем на правую часть экрана для перелистывания вперед
-                    webdriver.ActionChains(self.driver).move_to_element_with_offset(
-                        self.driver.find_element(By.TAG_NAME, 'body'),
-                        self.driver.get_window_size()['width'] - 100,
-                        self.driver.get_window_size()['height'] // 2
-                    ).click().perform()
+                    # Если нашли навигационные элементы, используем их
+                    if navigation_elements.get('next_button'):
+                        selenium_logger.info("Используем кнопку 'Следующая страница'")
+                        navigation_elements['next_button'].click()
+                    else:
+                        selenium_logger.info("Используем клик по правой части экрана")
+                        # Нажимаем на правую часть экрана для перелистывания вперед
+                        webdriver.ActionChains(self.driver).move_to_element_with_offset(
+                            self.driver.find_element(By.TAG_NAME, 'body'),
+                            self.driver.get_window_size()['width'] - 100,
+                            self.driver.get_window_size()['height'] // 2
+                        ).click().perform()
                     
                     # Обновляем текущую страницу
                     self.current_page = page_num
                     
                     # Вызываем колбэк для обновления статуса
                     if self.current_page_callback:
+                        selenium_logger.info(f"Отправляем обновление статуса: страница {self.current_page} из {self.max_pages}")
                         self.current_page_callback(self.current_page, self.max_pages)
                     
                     # Ждем загрузки страницы
+                    selenium_logger.info(f"Ожидаем загрузку страницы {page_num}")
                     time.sleep(self.page_load_time)
                     
+                    # Сохраняем скриншот после перехода на следующую страницу
+                    log_screenshot(self.driver, f"page_{page_num}")
+                    
                     # Извлекаем контент с текущей страницы
+                    selenium_logger.info(f"Извлекаем контент со страницы {page_num}")
                     self.extract_current_page_content()
                     
                 except Exception as e:
-                    logging.error(f"Ошибка при перелистывании на страницу {page_num}: {str(e)}")
-                    break
+                    selenium_logger.error(f"Ошибка при перелистывании на страницу {page_num}: {str(e)}")
+                    selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
+                    
+                    # Сохраняем скриншот при ошибке
+                    log_screenshot(self.driver, f"error_page_{page_num}")
+                    
+                    # Если не удалось перелистнуть, пробуем другие методы
+                    try:
+                        selenium_logger.info("Пробуем альтернативный метод перелистывания")
+                        self._try_alternative_navigation()
+                        time.sleep(self.page_load_time)
+                        self.extract_current_page_content()
+                    except:
+                        selenium_logger.error("Альтернативные методы перелистывания не сработали")
+                        break
             
             # Собираем все перехваченные запросы
+            selenium_logger.info("Собираем все перехваченные запросы и данные")
             self.collect_captured_data()
+            
+            # Сохраняем скриншот по завершению навигации
+            log_screenshot(self.driver, "navigation_complete")
             
             return True
             
         except Exception as e:
-            logging.error(f"Ошибка при навигации по страницам: {str(e)}")
+            selenium_logger.error(f"Ошибка при навигации по страницам: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
             return False
+            
+    def _find_navigation_elements(self):
+        """
+        Ищет элементы навигации (кнопки вперед/назад)
+        
+        :return: Словарь с найденными элементами навигации
+        """
+        navigation = {}
+        
+        try:
+            selenium_logger.info("Ищем элементы навигации")
+            
+            # Различные селекторы для кнопки "Следующая страница"
+            next_selectors = [
+                "button.nextPage", 
+                "button.next-page", 
+                "a.nextPage", 
+                ".next-button",
+                "#btnNext",
+                "button[aria-label='Next page']",
+                "button[title='Next Page']",
+                ".nextPageButton"
+            ]
+            
+            # Различные селекторы для кнопки "Предыдущая страница"
+            prev_selectors = [
+                "button.prevPage", 
+                "button.prev-page", 
+                "a.prevPage", 
+                ".prev-button",
+                "#btnPrev",
+                "button[aria-label='Previous page']",
+                "button[title='Previous Page']",
+                ".prevPageButton"
+            ]
+            
+            # Ищем кнопку "Следующая страница"
+            for selector in next_selectors:
+                try:
+                    elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
+                    if elements and len(elements) > 0:
+                        navigation['next_button'] = elements[0]
+                        selenium_logger.info(f"Найдена кнопка 'Следующая страница' через селектор: {selector}")
+                        break
+                except Exception:
+                    continue
+            
+            # Ищем кнопку "Предыдущая страница"
+            for selector in prev_selectors:
+                try:
+                    elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
+                    if elements and len(elements) > 0:
+                        navigation['prev_button'] = elements[0]
+                        selenium_logger.info(f"Найдена кнопка 'Предыдущая страница' через селектор: {selector}")
+                        break
+                except Exception:
+                    continue
+                    
+            if not navigation.get('next_button'):
+                selenium_logger.info("Не найдены стандартные элементы навигации, будем использовать клики по областям экрана")
+            
+        except Exception as e:
+            selenium_logger.error(f"Ошибка при поиске элементов навигации: {str(e)}")
+            
+        return navigation
+        
+    def _try_alternative_navigation(self):
+        """
+        Пробует альтернативные методы навигации при ошибке
+        """
+        try:
+            # Пробуем нажать клавишу стрелки вправо
+            selenium_logger.info("Пробуем нажать клавишу стрелки вправо")
+            body = self.driver.find_element(By.TAG_NAME, 'body')
+            body.send_keys(webdriver.Keys.ARROW_RIGHT)
+            
+            # Если не сработало, пробуем JavaScript для прокрутки
+            selenium_logger.info("Пробуем JavaScript для прокрутки вправо")
+            self.driver.execute_script("window.scrollBy(100, 0);")
+            
+            # Пробуем найти и нажать на любой элемент с атрибутами, связанными с навигацией
+            selenium_logger.info("Ищем элементы с атрибутами, связанными с навигацией")
+            nav_elements = self.driver.find_elements(By.XPATH, "//*[contains(@class, 'next') or contains(@id, 'next') or contains(@aria-label, 'next') or contains(@title, 'Next')]")
+            if nav_elements and len(nav_elements) > 0:
+                selenium_logger.info(f"Найден навигационный элемент: {nav_elements[0].tag_name}")
+                nav_elements[0].click()
+                
+        except Exception as e:
+            selenium_logger.error(f"Все альтернативные методы навигации не удались: {str(e)}")
+            raise
 
+    @log_function_call(selenium_logger)
     def extract_current_page_content(self):
         """
         Извлекает текст и изображения с текущей страницы
         """
         if not self.driver:
+            selenium_logger.error("Драйвер не инициализирован при извлечении контента")
             return
             
         try:
-            logging.info(f"Извлекаем контент со страницы {self.current_page}")
+            selenium_logger.info(f"Извлекаем контент со страницы {self.current_page}")
+            
+            # Сохраняем скриншот страницы для анализа
+            log_screenshot(self.driver, f"content_extraction_page_{self.current_page}")
+            log_page_content(self.driver, f"content_extraction_page_{self.current_page}")
             
             # Извлекаем текст
             try:
+                selenium_logger.info(f"Извлекаем текст со страницы {self.current_page}")
+                
+                # Расширенный набор селекторов для поиска текстового контента
                 # Пытаемся найти элементы с текстом (разные варианты селекторов)
                 content_elements = []
                 selectors = [
@@ -535,29 +823,52 @@ class KindleAPIScraperEnhanced:
                     "div.kcrPage", 
                     "div.bookReaderContainer", 
                     "div.kindleReaderPage",
-                    "div.kb-viewarea"
+                    "div.kb-viewarea",
+                    "div.bookContents",
+                    "div.pageContainer",
+                    "div.readerPage",
+                    "div#kindleReader",
+                    "div#bookContent",
+                    "div.bookReaderPageContent"
                 ]
                 
                 for selector in selectors:
                     try:
+                        selenium_logger.info(f"Пробуем селектор: {selector}")
                         elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
                         if elements:
                             content_elements = elements
+                            selenium_logger.info(f"Найдены текстовые элементы через селектор: {selector}, количество: {len(elements)}")
                             break
-                    except:
+                    except Exception as selector_err:
+                        selenium_logger.debug(f"Ошибка при поиске по селектору {selector}: {str(selector_err)}")
                         continue
                 
                 # Если не нашли элементы ни по одному из селекторов, попробуем извлечь весь текст страницы
                 if not content_elements:
-                    logging.info("Не найдены стандартные элементы с текстом, извлекаем весь текст страницы")
+                    selenium_logger.info("Не найдены стандартные элементы с текстом, извлекаем весь текст страницы")
                     content_elements = [self.driver.find_element(By.TAG_NAME, "body")]
                 
                 # Извлекаем текст
                 page_text = ""
                 for elem in content_elements:
-                    elem_text = elem.text.strip()
-                    if elem_text:
-                        page_text += elem_text + "\n"
+                    try:
+                        # Получаем текст элемента
+                        elem_text = elem.text.strip()
+                        
+                        # Если текст есть, добавляем его
+                        if elem_text:
+                            page_text += elem_text + "\n"
+                            selenium_logger.debug(f"Извлечен текст из элемента ({len(elem_text)} символов)")
+                        
+                        # Если текста нет, пробуем извлечь его через JavaScript
+                        else:
+                            js_text = self.driver.execute_script("return arguments[0].textContent;", elem).strip()
+                            if js_text:
+                                page_text += js_text + "\n"
+                                selenium_logger.debug(f"Извлечен текст через JavaScript ({len(js_text)} символов)")
+                    except Exception as elem_err:
+                        selenium_logger.warning(f"Ошибка при извлечении текста из элемента: {str(elem_err)}")
                 
                 # Добавляем текст в структурированный контент
                 if page_text:
@@ -566,81 +877,191 @@ class KindleAPIScraperEnhanced:
                         "text": page_text
                     })
                     
-                    logging.info(f"Извлечен текст со страницы {self.current_page}: {len(page_text)} символов")
+                    # Также сохраняем в плоский текст для удобного вывода
+                    self.extracted_text += f"\n--- Страница {self.current_page} ---\n{page_text}\n"
+                    
+                    selenium_logger.info(f"Извлечен текст со страницы {self.current_page}: {len(page_text)} символов")
+                    
+                    # Логируем первые 100 символов для отладки
+                    text_preview = page_text[:100] + "..." if len(page_text) > 100 else page_text
+                    selenium_logger.debug(f"Образец текста: {text_preview}")
                 else:
-                    logging.warning(f"Не удалось извлечь текст со страницы {self.current_page}")
+                    selenium_logger.warning(f"Не удалось извлечь текст со страницы {self.current_page}")
+                    
+                    # Пробуем альтернативные методы извлечения
+                    selenium_logger.info("Пробуем альтернативный метод извлечения текста через JavaScript")
+                    full_page_text = self.driver.execute_script("return document.body.innerText;").strip()
+                    if full_page_text:
+                        # Очищаем текст от служебных элементов
+                        filtered_text = "\n".join([line for line in full_page_text.split("\n") 
+                                                if not line.startswith("Copyright") and 
+                                                not "amazon.com" in line.lower() and
+                                                len(line.strip()) > 0])
+                        
+                        self.structured_content["result"]["content"].append({
+                            "pageNumber": self.current_page,
+                            "text": filtered_text
+                        })
+                        
+                        self.extracted_text += f"\n--- Страница {self.current_page} (альтернативный метод) ---\n{filtered_text}\n"
+                        
+                        selenium_logger.info(f"Извлечен текст альтернативным методом: {len(filtered_text)} символов")
                 
             except Exception as e:
-                logging.error(f"Ошибка при извлечении текста со страницы {self.current_page}: {str(e)}")
+                selenium_logger.error(f"Ошибка при извлечении текста со страницы {self.current_page}: {str(e)}")
+                selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
             
             # Извлекаем изображения
             try:
-                # Пытаемся найти изображения на странице
+                selenium_logger.info(f"Ищем изображения на странице {self.current_page}")
+                
+                # Расширенный набор селекторов для изображений
                 image_selectors = [
                     "img.kfx-image",
                     "img.kc-kindle-image",
                     "img.kb-image",
-                    "img:not(.ui-icon)"
+                    "img.bookImage",
+                    "img.reader-image",
+                    "img.content-image",
+                    "img:not(.ui-icon):not(.nav-icon)",
+                    "canvas.book-canvas"  # Некоторые книги используют canvas вместо img
                 ]
                 
                 images = []
                 for selector in image_selectors:
                     try:
+                        selenium_logger.debug(f"Ищем изображения через селектор: {selector}")
                         found_images = self.driver.find_elements(By.CSS_SELECTOR, selector)
                         if found_images:
                             images.extend(found_images)
-                    except:
+                            selenium_logger.info(f"Найдено {len(found_images)} изображений через селектор: {selector}")
+                    except Exception as img_selector_err:
+                        selenium_logger.debug(f"Ошибка при поиске изображений через селектор {selector}: {str(img_selector_err)}")
                         continue
                 
                 # Обрабатываем найденные изображения
+                selenium_logger.info(f"Всего найдено {len(images)} изображений на странице {self.current_page}")
                 for idx, img in enumerate(images):
                     try:
+                        # Пытаемся получить src атрибут
                         src = img.get_attribute("src")
-                        if src and (src.startswith("data:image") or src.startswith("blob:")):
+                        
+                        # Для canvas элементов, пытаемся извлечь данные через JavaScript
+                        if img.tag_name.lower() == "canvas":
+                            selenium_logger.info(f"Обрабатываем элемент canvas #{idx+1}")
+                            try:
+                                # Извлекаем содержимое canvas как data URL
+                                src = self.driver.execute_script("""
+                                    return arguments[0].toDataURL('image/png');
+                                """, img)
+                            except Exception as canvas_err:
+                                selenium_logger.warning(f"Не удалось извлечь данные из canvas: {str(canvas_err)}")
+                        
+                        # Проверяем, получили ли мы валидный src
+                        if src and (src.startswith("data:image") or src.startswith("blob:") or src.startswith("http")):
+                            # Получаем альтернативный текст или генерируем имя
+                            alt_text = img.get_attribute("alt") or f"Image_{self.current_page}_{idx+1}"
+                            
                             # Сохраняем информацию об изображении
-                            self.images.append({
+                            image_info = {
                                 "pageNumber": self.current_page,
                                 "index": idx + 1,
                                 "src": src,
-                                "alt": img.get_attribute("alt") or f"Image_{self.current_page}_{idx+1}"
-                            })
+                                "alt": alt_text
+                            }
                             
-                            logging.info(f"Найдено изображение на странице {self.current_page}: {idx+1}")
+                            # Добавляем размеры изображения, если они доступны
+                            try:
+                                width = img.get_attribute("width") or img.size["width"] 
+                                height = img.get_attribute("height") or img.size["height"]
+                                if width and height:
+                                    image_info["dimensions"] = f"{width}x{height}"
+                            except:
+                                pass
+                                
+                            self.images.append(image_info)
+                            selenium_logger.info(f"Найдено изображение #{idx+1} на странице {self.current_page}: {alt_text}")
                     except Exception as img_err:
-                        logging.error(f"Ошибка при обработке изображения {idx+1} на странице {self.current_page}: {str(img_err)}")
+                        selenium_logger.error(f"Ошибка при обработке изображения #{idx+1}: {str(img_err)}")
                 
             except Exception as e:
-                logging.error(f"Ошибка при извлечении изображений со страницы {self.current_page}: {str(e)}")
+                selenium_logger.error(f"Ошибка при извлечении изображений со страницы {self.current_page}: {str(e)}")
+                selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
             
         except Exception as e:
-            logging.error(f"Ошибка при извлечении контента со страницы {self.current_page}: {str(e)}")
+            selenium_logger.error(f"Общая ошибка при извлечении контента со страницы {self.current_page}: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
 
+    @log_function_call(selenium_logger)
     def collect_captured_data(self):
         """
         Собирает перехваченные данные (запросы и изображения)
         """
         if not self.driver:
+            selenium_logger.error("Драйвер не инициализирован при сборе данных")
             return
             
         try:
-            logging.info("Собираем перехваченные данные")
+            selenium_logger.info("Собираем перехваченные данные")
             
             # Получаем перехваченные запросы
-            self.captured_requests = self.driver.execute_script("return window.getCapturedRequests ? window.getCapturedRequests() : [];")
-            logging.info(f"Получено перехваченных запросов: {len(self.captured_requests)}")
+            try:
+                selenium_logger.info("Получаем перехваченные API запросы")
+                self.captured_requests = self.driver.execute_script("return window.getCapturedRequests ? window.getCapturedRequests() : [];")
+                selenium_logger.info(f"Получено перехваченных запросов: {len(self.captured_requests)}")
+                
+                # Логируем типы перехваченных запросов для отладки
+                if self.captured_requests:
+                    request_types = {}
+                    for req in self.captured_requests:
+                        url = req.get('url', '')
+                        if 'api' in url:
+                            request_types['api'] = request_types.get('api', 0) + 1
+                        elif 'service' in url:
+                            request_types['service'] = request_types.get('service', 0) + 1
+                        else:
+                            request_types['other'] = request_types.get('other', 0) + 1
+                    
+                    selenium_logger.info(f"Типы перехваченных запросов: {request_types}")
+            except Exception as req_err:
+                selenium_logger.error(f"Ошибка при получении перехваченных запросов: {str(req_err)}")
+                selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
             
             # Получаем перехваченные изображения
-            self.captured_images = self.driver.execute_script("return window.getCapturedImages ? window.getCapturedImages() : [];")
-            logging.info(f"Получено перехваченных изображений: {len(self.captured_images)}")
+            try:
+                selenium_logger.info("Получаем перехваченные изображения")
+                self.captured_images = self.driver.execute_script("return window.getCapturedImages ? window.getCapturedImages() : [];")
+                selenium_logger.info(f"Получено перехваченных изображений: {len(self.captured_images)}")
+                
+                # Логируем типы перехваченных изображений для отладки
+                if self.captured_images:
+                    image_types = {}
+                    for img in self.captured_images:
+                        img_type = img.get('type', '')
+                        if img_type:
+                            image_types[img_type] = image_types.get(img_type, 0) + 1
+                        else:
+                            image_types['unknown'] = image_types.get('unknown', 0) + 1
+                    
+                    selenium_logger.info(f"Типы перехваченных изображений: {image_types}")
+            except Exception as img_err:
+                selenium_logger.error(f"Ошибка при получении перехваченных изображений: {str(img_err)}")
+                selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
+            
+            # Сохраняем скриншот после сбора данных
+            log_screenshot(self.driver, "after_data_collection")
             
             # Обрабатываем и сохраняем изображения
+            selenium_logger.info("Обрабатываем перехваченные изображения")
             self.process_captured_images()
             
             # Обрабатываем JSON контент из запросов
+            selenium_logger.info("Обрабатываем перехваченные JSON данные")
             self.process_captured_json()
             
         except Exception as e:
-            logging.error(f"Ошибка при сборе перехваченных данных: {str(e)}")
+            selenium_logger.error(f"Ошибка при сборе перехваченных данных: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
 
     def process_captured_images(self):
         """
