@@ -582,9 +582,24 @@ class KindleAutoAPIScraper:
             if self.current_page_callback:
                 self.current_page_callback(current_page, max_pages)
             
+            # Выводим сообщение о начале ручного режима
+            print("\n" + "="*80)
+            print("РЕЖИМ РУЧНОГО ПЕРЕЛИСТЫВАНИЯ АКТИВИРОВАН:")
+            print("1. Перелистывайте страницы книги с помощью клавиш или мыши")
+            print("2. Система автоматически делает скриншот каждой новой страницы")
+            print("3. Введите 'quit' в консоли когда захотите закончить")
+            print("="*80 + "\n")
+            
             try:
                 # Основной цикл ожидания изменений
                 while current_page < max_pages:
+                    # Проверяем, хочет ли пользователь завершить работу
+                    print(f"Текущая страница: {current_page}. Для выхода введите 'quit', для продолжения нажмите Enter:")
+                    user_input = input().strip().lower()
+                    if user_input == 'quit':
+                        selenium_logger.info("Пользователь запросил завершение режима ручного скриншота")
+                        break
+                    
                     # Ждем некоторое время перед проверкой
                     time.sleep(1)
                     
@@ -603,9 +618,12 @@ class KindleAutoAPIScraper:
                         selenium_logger.info(f"Обнаружено изменение страницы! Делаем скриншот страницы {current_page}")
                         self.driver.save_screenshot(screenshot_path)
                         selenium_logger.info(f"Скриншот сохранен: {screenshot_path}")
+                        print(f"✓ Сохранен скриншот страницы {current_page}: {screenshot_path}")
                         
                         # Обновляем исходный код страницы
                         last_page_source = current_page_source
+                    else:
+                        print("Страница не изменилась с последнего скриншота. Перелистните страницу.")
                         
             except KeyboardInterrupt:
                 selenium_logger.info("Получен сигнал прерывания, завершаем режим ручного скриншота")
@@ -1008,22 +1026,37 @@ class KindleAutoAPIScraper:
             return False
 
     @log_function_call(selenium_logger)
-    def cleanup(self):
+    def cleanup(self, ask_confirmation=True):
         """
         Очистка ресурсов и закрытие драйвера
+        
+        :param ask_confirmation: Если True, запрашивает подтверждение перед закрытием браузера
         """
         try:
             if self.driver:
-                selenium_logger.info("Закрываем браузер")
-                
                 # Сохраняем финальный скриншот для отладки
                 try:
                     log_screenshot(self.driver, "final_state_before_quit")
                 except Exception as screenshot_err:
                     selenium_logger.warning(f"Не удалось сохранить финальный скриншот: {str(screenshot_err)}")
                 
+                if ask_confirmation:
+                    # Запрашиваем подтверждение пользователя перед закрытием браузера
+                    print("\n" + "="*80)
+                    print("ВНИМАНИЕ: Закрытие браузера")
+                    print("Парсер завершил работу. Нажмите Enter для закрытия браузера или 'k' для сохранения браузера открытым:")
+                    user_input = input().strip().lower()
+                    
+                    if user_input == 'k':
+                        selenium_logger.info("Пользователь выбрал оставить браузер открытым")
+                        print("Браузер оставлен открытым. Вы можете продолжить работу с ним вручную.")
+                        return
+                
+                # Закрываем браузер
+                selenium_logger.info("Закрываем браузер")
                 self.driver.quit()
                 selenium_logger.info("Браузер успешно закрыт")
+                self.driver = None
                 
         except Exception as e:
             selenium_logger.error(f"Ошибка при закрытии браузера: {str(e)}")
@@ -1115,8 +1148,36 @@ class KindleAutoAPIScraper:
                 
             # Открываем книгу
             selenium_logger.info(f"Открываем книгу, ASIN: {self.asin}")
-            if not self.open_book():
-                selenium_logger.error(f"Не удалось открыть книгу, ASIN: {self.asin}")
+            
+            # Увеличиваем время ожидания открытия книги
+            try:
+                # Отображаем сообщение пользователю
+                print("\n" + "="*80)
+                print("ИНСТРУКЦИЯ:")
+                print("1. Дождитесь загрузки книги в браузере и авторизуйтесь если необходимо")
+                print("2. После авторизации/загрузки книги нажмите любую клавишу в консоли для продолжения")
+                print("3. Подтвердите, что книга открыта и вы видите её содержимое")
+                print("="*80 + "\n")
+                
+                # Открываем книгу
+                if not self.open_book():
+                    selenium_logger.error(f"Не удалось открыть книгу, ASIN: {self.asin}")
+                    print("Ошибка открытия книги. Нажмите ENTER для закрытия браузера или 'c' для продолжения:")
+                    user_input = input().strip().lower()
+                    if user_input == 'c':
+                        selenium_logger.info("Пользователь выбрал продолжение несмотря на ошибку")
+                    else:
+                        selenium_logger.info("Пользователь выбрал закрытие браузера после ошибки")
+                        self.cleanup()
+                        return False
+                        
+                # Ждем подтверждение от пользователя
+                print("Книга загружена? Нажмите ENTER для продолжения:")
+                input()
+                selenium_logger.info("Получено подтверждение пользователя о загрузке книги")
+                
+            except Exception as e:
+                selenium_logger.error(f"Ошибка при открытии книги: {str(e)}")
                 self.cleanup()
                 return False
                 
