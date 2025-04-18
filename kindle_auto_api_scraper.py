@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import sys
 import time
 import traceback
 from urllib.parse import urlparse, parse_qs
@@ -10,10 +11,13 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.chrome import ChromeDriverManager
 
 # Импортируем расширенное логирование
 from debug_utils import (
@@ -112,35 +116,155 @@ class KindleAutoAPIScraper:
             
         return None
 
+    @log_function_call(selenium_logger)
     def setup_driver(self):
         """
-        Настройка и запуск веб-драйвера Firefox с перехватом сетевых запросов
+        Настройка и запуск веб-драйвера с поддержкой различных браузеров
         """
         try:
-            logging.info("Настройка веб-драйвера Firefox")
+            # Пробуем сначала использовать Firefox напрямую
+            return self._setup_direct_browser()
+        except Exception as direct_error:
+            selenium_logger.warning(f"Не удалось настроить браузер напрямую: {str(direct_error)}")
+            selenium_logger.info("Пробуем установить браузерный драйвер...")
             
-            options = Options()
-            options.add_argument("-headless")  # Запуск в фоновом режиме
+            # Если прямой запуск не удался, пробуем установку драйвера
+            try:
+                return self._setup_managed_browser()
+            except Exception as managed_error:
+                selenium_logger.error(f"Не удалось установить и настроить драйвер: {str(managed_error)}")
+                selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
+                return False
+    
+    def _setup_direct_browser(self):
+        """
+        Настройка и запуск браузера с использованием локальных драйверов
+        """
+        selenium_logger.info("Пробуем настроить локально установленный браузер")
+        
+        # Сначала пробуем Firefox
+        try:
+            selenium_logger.info("Пробуем локальный Firefox")
+            options = FirefoxOptions()
             
-            # Добавляем логгирование непосредственно в опции
+            # Настройки для производительности и лучшего логирования
             options.set_preference("devtools.netmonitor.enabled", True)
             options.set_preference("devtools.netmonitor.har.enabled", True)
             options.set_preference("devtools.netmonitor.har.defaultLogDir", os.getcwd())
             options.set_preference("devtools.netmonitor.har.enableAutoExportToFile", True)
             
-            # Добавляем настройки логгирования
-            options.log.level = "trace"  # Максимальный уровень логгирования
+            # Добавляем настройки для перехвата сетевого трафика
+            options.set_preference("devtools.console.stdout.content", True)
+            options.set_preference("browser.cache.disk.enable", False)
+            options.set_preference("browser.cache.memory.enable", False)
+            options.set_preference("browser.cache.offline.enable", False)
+            options.set_preference("network.http.use-cache", False)
             
-            service = Service(GeckoDriverManager().install())
+            # Убираем режим headless для отладки
+            # options.add_argument("-headless")
+            
+            # Создаём драйвер без явного указания пути к geckodriver
+            self.driver = webdriver.Firefox(options=options)
+            self.driver.set_window_size(1366, 768)
+            selenium_logger.info("Firefox запущен успешно с локальным драйвером")
+            
+            # Сохраняем скриншот для подтверждения
+            log_screenshot(self.driver, "firefox_direct_started")
+            
+            return True
+        except Exception as firefox_error:
+            selenium_logger.warning(f"Не удалось запустить локальный Firefox: {str(firefox_error)}")
+            
+            # Если Firefox не удалось запустить, пробуем Chrome
+            try:
+                selenium_logger.info("Пробуем локальный Chrome")
+                options = ChromeOptions()
+                options.add_argument("--window-size=1366,768")
+                options.add_argument("--disable-notifications")
+                
+                # Для перехвата трафика
+                options.add_argument("--auto-open-devtools-for-tabs")
+                options.add_experimental_option("perfLoggingPrefs", {
+                    "enableNetwork": True,
+                    "enablePage": True
+                })
+                
+                # Убираем режим headless для отладки
+                # options.add_argument("--headless=new")
+                
+                # Создаём драйвер без явного указания пути к chromedriver
+                self.driver = webdriver.Chrome(options=options)
+                selenium_logger.info("Chrome запущен успешно с локальным драйвером")
+                
+                # Сохраняем скриншот для подтверждения
+                log_screenshot(self.driver, "chrome_direct_started")
+                
+                return True
+            except Exception as chrome_error:
+                selenium_logger.warning(f"Не удалось запустить локальный Chrome: {str(chrome_error)}")
+                raise Exception(f"Firefox error: {str(firefox_error)}, Chrome error: {str(chrome_error)}")
+    
+    def _setup_managed_browser(self):
+        """
+        Настройка и запуск браузера с автоматической установкой драйверов
+        """
+        selenium_logger.info("Пробуем установить драйвер и запустить браузер")
+        
+        # Увеличиваем таймаут для установки драйвера
+        try:
+            # Сначала Firefox с webdriver-manager
+            selenium_logger.info("Устанавливаем geckodriver")
+            options = FirefoxOptions()
+            options.set_preference("devtools.netmonitor.enabled", True)
+            options.set_preference("devtools.netmonitor.har.enabled", True)
+            options.set_preference("devtools.netmonitor.har.defaultLogDir", os.getcwd())
+            options.set_preference("devtools.netmonitor.har.enableAutoExportToFile", True)
+            
+            # Убираем режим headless для отладки
+            # options.add_argument("-headless")
+            
+            # Используем увеличенный таймаут
+            service = FirefoxService(GeckoDriverManager(timeout=240).install())
             self.driver = webdriver.Firefox(service=service, options=options)
             self.driver.set_window_size(1366, 768)
             
-            logging.info("Веб-драйвер Firefox успешно настроен")
-            return True
+            # Сохраняем скриншот для подтверждения
+            log_screenshot(self.driver, "firefox_managed_started")
             
-        except Exception as e:
-            logging.error(f"Ошибка при настройке веб-драйвера: {str(e)}")
-            return False
+            selenium_logger.info("Firefox успешно запущен с установленным драйвером")
+            return True
+        except Exception as firefox_error:
+            selenium_logger.warning(f"Не удалось установить и запустить Firefox: {str(firefox_error)}")
+            
+            # Если Firefox не удалось, пробуем Chrome
+            try:
+                selenium_logger.info("Устанавливаем chromedriver")
+                options = ChromeOptions()
+                options.add_argument("--window-size=1366,768")
+                options.add_argument("--disable-notifications")
+                
+                # Для перехвата трафика
+                options.add_argument("--auto-open-devtools-for-tabs")
+                options.add_experimental_option("perfLoggingPrefs", {
+                    "enableNetwork": True,
+                    "enablePage": True
+                })
+                
+                # Убираем режим headless для отладки
+                # options.add_argument("--headless=new")
+                
+                # Используем увеличенный таймаут
+                service = ChromeService(ChromeDriverManager(timeout=240).install())
+                self.driver = webdriver.Chrome(service=service, options=options)
+                
+                # Сохраняем скриншот для подтверждения
+                log_screenshot(self.driver, "chrome_managed_started")
+                
+                selenium_logger.info("Chrome успешно запущен с установленным драйвером")
+                return True
+            except Exception as chrome_error:
+                selenium_logger.error(f"Не удалось установить и запустить Chrome: {str(chrome_error)}")
+                raise Exception(f"Firefox install error: {str(firefox_error)}, Chrome install error: {str(chrome_error)}")
 
     @log_function_call(selenium_logger)
     def login(self):
@@ -739,6 +863,63 @@ class KindleAutoAPIScraper:
             selenium_logger.error(f"Ошибка при закрытии браузера: {str(e)}")
             selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
 
+    def _generate_environment_report(self):
+        """
+        Генерирует отчет о системном окружении для отладки
+        """
+        try:
+            env_report = {
+                "os_info": os.name,
+                "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+                "cwd": os.getcwd(),
+                "packages": {
+                    "selenium": getattr(selenium, "__version__", "unknown"),
+                    "requests": getattr(requests, "__version__", "unknown")
+                }
+            }
+            
+            # Проверяем доступность браузеров
+            try:
+                import shutil
+                env_report["browsers"] = {
+                    "firefox_path": shutil.which("firefox"),
+                    "chrome_path": shutil.which("chrome") or shutil.which("chromium") or shutil.which("google-chrome"),
+                    "geckodriver_path": shutil.which("geckodriver"),
+                    "chromedriver_path": shutil.which("chromedriver")
+                }
+            except Exception as browser_error:
+                env_report["browsers_error"] = str(browser_error)
+            
+            # Проверяем сетевую доступность ключевых сервисов
+            try:
+                network_checks = {}
+                for url in ["https://www.amazon.com", "https://read.amazon.com"]:
+                    try:
+                        response = requests.head(url, timeout=5)
+                        network_checks[url] = {
+                            "status_code": response.status_code,
+                            "reachable": True
+                        }
+                    except Exception as req_err:
+                        network_checks[url] = {
+                            "error": str(req_err),
+                            "reachable": False
+                        }
+                env_report["network_checks"] = network_checks
+            except Exception as net_error:
+                env_report["network_error"] = str(net_error)
+                
+            # Записываем отчет в файл
+            report_file = "environment_report.json"
+            with open(report_file, "w") as f:
+                json.dump(env_report, f, indent=2)
+                
+            selenium_logger.info(f"Отчет о системном окружении сохранен в {report_file}")
+            return env_report
+        except Exception as e:
+            selenium_logger.error(f"Ошибка при создании отчета окружения: {str(e)}")
+            return {"error": str(e)}
+
     @log_function_call(selenium_logger)
     def run(self):
         """
@@ -755,6 +936,8 @@ class KindleAutoAPIScraper:
             selenium_logger.info("Настраиваем веб-драйвер")
             if not self.setup_driver():
                 selenium_logger.error("Не удалось настроить веб-драйвер")
+                # Генерируем отчет о среде при неудаче
+                self._generate_environment_report()
                 return False
                 
             # Открываем Kindle Cloud Reader
@@ -820,7 +1003,10 @@ class KindleAutoAPIScraper:
                             ".kindle-book-content", 
                             "#kindleReader-content", 
                             ".bookContent",
-                            "#book-content"
+                            "#book-content",
+                            ".book-container",
+                            ".bookTextView",
+                            "#bookTextView"
                         ]
                         
                         for selector in alternative_selectors:
@@ -887,6 +1073,17 @@ class KindleAutoAPIScraper:
         except Exception as e:
             selenium_logger.error(f"Ошибка при запуске процесса извлечения: {str(e)}")
             selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
+            
+            # Генерируем отчет о системном окружении при ошибке
+            self._generate_environment_report()
+            
+            # Сохраняем скриншот для отладки, если драйвер существует
+            if self.driver:
+                try:
+                    log_screenshot(self.driver, "error_state")
+                except Exception:
+                    pass
+                    
             self.cleanup()
             return False
 
