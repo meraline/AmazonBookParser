@@ -155,30 +155,82 @@ def run_scraper(email, password, book_url, output_file, pages_to_read, page_load
         scraper_status["running"] = False
 
 
-def run_api_scraper(response_file, output_file):
+def run_api_scraper(response_file=None, output_file=None, book_url=None, email=None, password=None):
     """Функция для запуска API скрапера в отдельном потоке"""
     try:
         scraper_status["running"] = True
         scraper_status["progress"] = 0
-        scraper_status["total_pages"] = 1  # Одна операция извлечения
+        scraper_status["total_pages"] = 1  # Изначально устанавливаем одну операцию
         scraper_status["current_page"] = 0
         scraper_status["log_messages"] = []
         
         log_handler("Запуск процесса извлечения текста через API")
         
-        # Создаем экземпляр API скрапера
-        scraper = KindleAPIScraper(output_file=output_file)
+        # Создаем экземпляр API скрапера с учетными данными, если они предоставлены
+        scraper = KindleAPIScraper(
+            email=email,
+            password=password,
+            book_url=book_url,
+            output_file=output_file,
+            session_cookies=None
+        )
         
-        # Запускаем извлечение
-        log_handler(f"Начало обработки файла: {response_file}")
+        # Показываем информацию о параметрах запуска
+        if book_url:
+            log_handler(f"Извлечение из URL: {book_url}")
+            book_id = scraper._extract_asin(book_url)
+            if book_id:
+                log_handler(f"Найден ID книги (ASIN): {book_id}")
+            else:
+                log_handler(f"Не удалось извлечь ID книги из URL")
+                
+        if email:
+            log_handler(f"Будет выполнена авторизация с учетной записью: {email}")
+            
+        if response_file:
+            log_handler(f"Начало обработки файла: {response_file}")
+            
+        log_handler(f"Результат будет сохранен в файл: {output_file}")
         
-        success = scraper.run(response_file=response_file)
+        # Засекаем время начала обработки
+        start_time = time.time()
+        
+        # Запускаем извлечение в зависимости от предоставленных параметров
+        if response_file:
+            success = scraper.run(response_file=response_file)
+        else:
+            success = scraper.run()
+        
+        # Засекаем время окончания обработки
+        end_time = time.time()
+        processing_time = end_time - start_time
         
         if success:
             scraper_status["progress"] = 100
             log_handler(f"Текст успешно извлечен и сохранен в файл: {output_file}")
+            log_handler(f"Время обработки: {processing_time:.2f} секунд")
+            
+            # Сообщаем о сохранении структурированного JSON
+            json_file = output_file.replace('.txt', '.json')
+            log_handler(f"Структурированные данные сохранены в файл: {json_file}")
+            
+            # Обновляем счетчики страниц
+            if hasattr(scraper, 'structured_content') and scraper.structured_content:
+                if "result" in scraper.structured_content and "content" in scraper.structured_content["result"]:
+                    content_length = len(scraper.structured_content["result"]["content"])
+                    scraper_status["total_pages"] = content_length
+                    scraper_status["current_page"] = content_length
+                    
+                    # Выводим информацию о книге
+                    if "title" in scraper.structured_content["result"] and scraper.structured_content["result"]["title"]:
+                        log_handler(f"Название книги: {scraper.structured_content['result']['title']}")
+                        
+                    if "author" in scraper.structured_content["result"] and scraper.structured_content["result"]["author"]:
+                        log_handler(f"Автор: {scraper.structured_content['result']['author']}")
+                        
+                    log_handler(f"Извлечено страниц: {content_length}")
         else:
-            log_handler("Ошибка при извлечении текста из API ответа")
+            log_handler("Ошибка при извлечении текста с помощью API-парсера")
         
     except Exception as e:
         log_handler(f"Ошибка в процессе обработки API: {str(e)}")
@@ -304,15 +356,27 @@ def start_scraping():
     
     elif method == 'api':
         # Получаем параметры для API скрапера
-        # В нашем тестовом случае используем предопределенный файл
-        response_file = request.form.get('response_file', 'sample_kindle_response.json')
+        book_url = request.form.get('book_url', '')
         output_file = request.form.get('output_file', 'kindle_api_book.txt')
+        email = request.form.get('email', '')
+        password = request.form.get('password', '')
         
-        # Запускаем API скрапер в отдельном потоке
-        threading.Thread(
-            target=run_api_scraper,
-            args=(response_file, output_file)
-        ).start()
+        # Если URL не предоставлен, используем тестовый файл
+        if not book_url:
+            response_file = 'sample_kindle_response.json'
+            # Используем логгер без изменения глобальных переменных в основном потоке
+            logging.info(f"URL книги не указан, используем тестовый файл: {response_file}")
+            # Запускаем API скрапер в отдельном потоке с тестовым файлом
+            threading.Thread(
+                target=run_api_scraper,
+                args=(response_file, output_file, None, None, None)
+            ).start()
+        else:
+            # Запускаем API скрапер в отдельном потоке с URL и учетными данными
+            threading.Thread(
+                target=run_api_scraper,
+                args=(None, output_file, book_url, email, password)
+            ).start()
     
     elif method == 'web':
         # Получаем параметры для веб-скрапера
