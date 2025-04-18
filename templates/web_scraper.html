@@ -5,50 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kindle Web Scraper</title>
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
-<body data-bs-theme="dark">
+<body>
     <div class="container py-4">
         <header class="pb-3 mb-4 border-bottom">
-            <h1 class="display-5 fw-bold">Парсер Kindle Web</h1>
-            <p class="lead">Прямое извлечение текста из URL Kindle Cloud Reader</p>
+            <div class="d-flex align-items-center text-white">
+                <img src="/static/logo.svg" width="40" alt="Kindle Scraper Logo" class="me-2">
+                <h1>Kindle Web Scraper</h1>
+            </div>
         </header>
-
-        <div class="row">
+        
+        <div class="row align-items-md-stretch">
             <div class="col-md-6">
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h2 class="card-title">Настройки веб-парсера</h2>
+                        <h2 class="card-title">Автоматический веб-парсер</h2>
                     </div>
                     <div class="card-body">
-                        <form id="webScraperForm">
-                            <input type="hidden" name="method" value="web">
+                        <form id="webScraperForm" method="post">
                             <div class="mb-3">
-                                <label for="book_url" class="form-label">URL книги</label>
-                                <input type="url" class="form-control" id="book_url" name="book_url" 
-                                       value="https://read.amazon.com/?x-client-id=ads-store&_encoding=UTF8&asin=B009SE1Z9E&consumptionLimitReached=false&hasMultimedia=false&requiredCapabilities=EBOK_PURCHASE_ALLOWED&ref_=ast_author_rff" required>
+                                <label for="book_url" class="form-label">URL книги в Kindle Cloud Reader</label>
+                                <input type="url" class="form-control" id="book_url" name="book_url" required 
+                                       placeholder="https://read.amazon.com/...">
+                                <div class="form-text">Например: https://read.amazon.com/?asin=B009SE1Z9E</div>
                             </div>
+                            
                             <div class="mb-3">
                                 <label for="output_file" class="form-label">Имя файла для сохранения</label>
-                                <input type="text" class="form-control" id="output_file" name="output_file" value="kindle_web_book.txt" required>
+                                <input type="text" class="form-control" id="output_file" name="output_file" value="kindle_web_book.txt">
                             </div>
+                            
+                            <div class="mb-3">
+                                <label for="page_count" class="form-label">Количество страниц для автоматического извлечения</label>
+                                <input type="number" class="form-control" id="page_count" name="page_count" value="50" min="1" max="1000">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="auto_paginate" name="auto_paginate" value="1" checked>
+                                    <label class="form-check-label" for="auto_paginate">
+                                        Автоматическая пагинация
+                                    </label>
+                                </div>
+                                <div class="form-text">При включении система будет автоматически переходить по страницам</div>
+                            </div>
+                            
+                            <input type="hidden" name="method" value="web">
+                            
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-primary" id="startButton">Запустить веб-парсер</button>
                                 <button type="button" class="btn btn-danger" id="stopButton" disabled>Остановить</button>
+                                <a href="/" class="btn btn-secondary">Перейти к Selenium парсеру</a>
+                                <a href="/test_api_scraper" class="btn btn-secondary">Перейти к API парсеру</a>
                             </div>
                         </form>
-                    </div>
-                </div>
-                
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h2 class="card-title">Навигация</h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <a href="/" class="btn btn-secondary">Перейти к Selenium парсеру</a>
-                            <a href="/test_api_scraper" class="btn btn-secondary">Перейти к API парсеру</a>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -69,7 +80,7 @@
                             </div>
                             
                             <div class="mb-3">
-                                <p>Прогресс: <span id="currentPage">0</span> из <span id="totalPages">0</span></p>
+                                <p>Страница: <span id="currentPage">0</span> из <span id="totalPages">0</span></p>
                             </div>
                         </div>
                     </div>
@@ -93,28 +104,31 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">Как работает веб-парсер</h2>
+                        <h2 class="card-title">О веб-парсере</h2>
                     </div>
                     <div class="card-body">
-                        <p>Этот метод пытается извлечь текст книги напрямую из URL Kindle Cloud Reader, используя различные подходы:</p>
-                        
+                        <p>Веб-парсер пытается автоматически извлечь текст книги из Kindle Cloud Reader следующими способами:</p>
                         <ol>
-                            <li>Анализ URL для извлечения ASIN (идентификатора книги)</li>
-                            <li>Попытка прямого извлечения содержимого страницы с использованием библиотеки trafilatura</li>
-                            <li>Проверка различных API-эндпоинтов Amazon для получения данных книги</li>
+                            <li>Прямое извлечение текста из HTML-страницы</li>
+                            <li>Попытка получения данных через API Kindle</li>
+                            <li>Автоматическое чтение страниц и извлечение текста</li>
                         </ol>
                         
                         <div class="alert alert-info">
-                            <strong>Примечание:</strong> 
-                            <p>Этот метод может не сработать для всех книг из-за ограничений Amazon. Если прямое извлечение не удастся, попробуйте метод API-парсера через панель Network в браузере.</p>
+                            <strong>Преимущества веб-парсера:</strong>
+                            <ul>
+                                <li>Не требует ручного вмешательства</li>
+                                <li>Автоматически сохраняет извлеченный текст</li>
+                                <li>Работает с любыми книгами в вашей библиотеке Kindle</li>
+                            </ul>
                         </div>
                         
                         <div class="alert alert-warning">
-                            <strong>Ограничения:</strong> 
+                            <strong>Важно:</strong>
                             <ul>
-                                <li>Для доступа к контенту книги требуется авторизация в Amazon</li>
-                                <li>Некоторые книги могут быть защищены от прямого скрапинга</li>
-                                <li>Структура страниц Kindle Cloud Reader может меняться, что повлияет на работу парсера</li>
+                                <li>Используйте этот метод только для книг, которые вы приобрели легально</li>
+                                <li>Для доступа к книге требуется активная сессия в Amazon Kindle</li>
+                                <li>URL должен начинаться с https://read.amazon.com/</li>
                             </ul>
                         </div>
                     </div>
@@ -123,7 +137,7 @@
         </div>
         
         <footer class="pt-3 mt-4 text-muted border-top">
-            &copy; 2023 Kindle Parser
+            &copy; 2023 Kindle Web Scraper
         </footer>
     </div>
 

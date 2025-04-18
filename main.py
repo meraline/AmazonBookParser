@@ -200,23 +200,32 @@ def test_web_scraper():
     """Тестовая страница для веб-скрапера"""
     return render_template('web_scraper.html')
 
-def run_web_scraper(book_url, output_file):
+def run_web_scraper(book_url, output_file, page_count=50, auto_paginate=True):
     """Функция для запуска веб-скрапера в отдельном потоке"""
     try:
         scraper_status["running"] = True
         scraper_status["progress"] = 0
-        scraper_status["total_pages"] = 1  # Одна операция извлечения
+        
+        # Устанавливаем общее количество страниц
+        scraper_status["total_pages"] = page_count if auto_paginate else 1
         scraper_status["current_page"] = 0
         scraper_status["log_messages"] = []
         
-        log_handler("Запуск процесса извлечения текста через веб-скрапер")
+        log_handler("Запуск процесса извлечения текста через веб-парсер")
         
-        # Создаем экземпляр веб-скрапера
-        scraper = KindleWebScraper(book_url=book_url, output_file=output_file)
+        # Создаем экземпляр веб-скрапера с параметрами пагинации
+        scraper = KindleWebScraper(
+            book_url=book_url, 
+            output_file=output_file,
+            page_count=page_count,
+            auto_paginate=auto_paginate
+        )
         
         # Запускаем извлечение
         log_handler(f"Попытка извлечения текста из URL: {book_url}")
-        scraper_status["progress"] = 10
+        log_handler(f"Режим автоматической пагинации: {'включен' if auto_paginate else 'выключен'}")
+        log_handler(f"Запланировано страниц для обработки: {page_count}")
+        scraper_status["progress"] = 5
         
         # Пробуем получить ASIN книги
         if scraper.asin:
@@ -224,11 +233,23 @@ def run_web_scraper(book_url, output_file):
         else:
             log_handler("ASIN книги не найден, используем полный URL")
         
-        scraper_status["progress"] = 30
-        log_handler("Попытка прямого извлечения контента...")
+        scraper_status["progress"] = 10
+        log_handler("Начинаем извлечение содержимого...")
         
+        # Устанавливаем обработчик обновления статуса
+        def update_status_callback(current_page, total_pages):
+            scraper_status["current_page"] = current_page
+            # Вычисляем прогресс на основе текущей страницы
+            progress = min(100, int(10 + (current_page / total_pages) * 90)) if total_pages > 0 else 100
+            scraper_status["progress"] = progress
+            
+        # Привязываем обработчик к скраперу
+        scraper.current_page_callback = update_status_callback
+        
+        # Запускаем процесс извлечения
         success = scraper.run()
         
+        # Устанавливаем 100% прогресс по окончании
         scraper_status["progress"] = 100
         if success:
             log_handler(f"Текст успешно извлечен и сохранен в файл: {output_file}")

@@ -3,24 +3,32 @@ import requests
 import json
 import logging
 import time
+import os
+import re
+from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
 
 logging.basicConfig(filename='kindle_web_scraper.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 class KindleWebScraper:
-    def __init__(self, book_url=None, output_file="kindle_book.txt", session_cookies=None):
+    def __init__(self, book_url=None, output_file="kindle_book.txt", session_cookies=None, page_count=50, auto_paginate=True):
         """
         Инициализация веб-скрапера для Kindle Cloud Reader
         
         :param book_url: URL книги в Kindle Cloud Reader
         :param output_file: Имя файла для сохранения текста
         :param session_cookies: Cookies для авторизации (опционально)
+        :param page_count: Количество страниц для чтения (при автоматической пагинации)
+        :param auto_paginate: Включение автоматической пагинации
         """
         self.book_url = book_url
         self.output_file = output_file
         self.session_cookies = session_cookies or {}
         self.session = requests.Session()
+        self.page_count = page_count
+        self.auto_paginate = auto_paginate
+        self.current_page = 0
         
         # Устанавливаем заголовки для имитации браузера
         self.headers = {
@@ -164,6 +172,74 @@ class KindleWebScraper:
             logging.error(f"Error saving text: {e}")
             return False
     
+    def get_content_with_pagination(self):
+        """
+        Автоматическая пагинация и извлечение контента со страниц
+        
+        :return: True если успешно, иначе False
+        """
+        try:
+            if not self.auto_paginate:
+                logging.info("Automatic pagination is disabled")
+                return False
+                
+            if not self.book_url or not self.asin:
+                logging.error("Cannot paginate without book URL and ASIN")
+                return False
+                
+            # URL-шаблон для страниц книги
+            page_url_template = f"https://read.amazon.com/read?asin={self.asin}&page={{0}}"
+            
+            logging.info(f"Starting automatic pagination for {self.page_count} pages")
+            
+            # Перебираем страницы
+            for page_num in range(1, self.page_count + 1):
+                if page_num > 1:
+                    # Сохраняем прогресс после каждой страницы
+                    self.save_text()
+                
+                self.current_page = page_num
+                page_url = page_url_template.format(page_num)
+                
+                logging.info(f"Fetching page {page_num} of {self.page_count}: {page_url}")
+                
+                # Получаем контент страницы
+                response = self.session.get(page_url, headers=self.headers)
+                
+                if response.status_code == 200:
+                    # Извлекаем текст из HTML с помощью BeautifulSoup
+                    soup = BeautifulSoup(response.text, 'html.parser')
+                    
+                    # Ищем контент - в разных книгах он может быть в разных элементах
+                    content_elements = soup.select('.page-content, .bookReaderReadingPanel, .kindleReaderPage')
+                    
+                    if content_elements:
+                        for element in content_elements:
+                            text = element.get_text(strip=True)
+                            if text:
+                                self.text_content.append(f"Page {page_num}:\n{text}")
+                                logging.info(f"Extracted {len(text)} characters from page {page_num}")
+                    else:
+                        # Если не нашли специальные элементы, попробуем извлечь весь текст страницы
+                        text = trafilatura.extract(response.text)
+                        if text:
+                            self.text_content.append(f"Page {page_num}:\n{text}")
+                            logging.info(f"Extracted {len(text)} characters from page {page_num} using trafilatura")
+                        else:
+                            logging.warning(f"No text found on page {page_num}")
+                else:
+                    logging.error(f"Failed to fetch page {page_num}, status code: {response.status_code}")
+                
+                # Пауза между запросами, чтобы не перегружать сервер
+                time.sleep(2)
+            
+            logging.info(f"Pagination completed, processed {self.page_count} pages")
+            return True
+            
+        except Exception as e:
+            logging.error(f"Error during pagination: {e}")
+            return False
+    
     def run(self):
         """
         Запускает процесс извлечения
@@ -171,6 +247,7 @@ class KindleWebScraper:
         :return: True если успешно, иначе False
         """
         logging.info(f"Starting extraction from URL: {self.book_url}")
+        success = False
         
         # Пробуем получить контент через trafilatura
         content_extracted = self.get_book_content()
@@ -180,9 +257,18 @@ class KindleWebScraper:
             logging.info("Direct content extraction failed, trying API endpoints...")
             content_extracted = self.try_api_endpoints()
         
+        # Если API не помог, пробуем автоматическую пагинацию
+        if not content_extracted and self.auto_paginate:
+            logging.info("API extraction failed, trying automatic pagination...")
+            content_extracted = self.get_content_with_pagination()
+        
         # Сохраняем результат, если есть что сохранять
-        if content_extracted:
-            return self.save_text()
+        if content_extracted or self.text_content:
+            success = self.save_text()
+            
+        if success:
+            logging.info("Text extraction completed successfully")
+            return True
         else:
             logging.error("Failed to extract content from any source")
             return False
