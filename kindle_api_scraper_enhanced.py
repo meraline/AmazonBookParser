@@ -5,16 +5,28 @@ import logging
 import os
 import re
 import base64
+import traceback
 from urllib.parse import urlparse, parse_qs
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
+
+# Импортируем расширенное логирование
+from debug_utils import (
+    selenium_logger,
+    api_logger, 
+    parsing_logger,
+    log_function_call,
+    log_page_content,
+    log_screenshot,
+    log_parsed_content
+)
 
 # Настройка логирования
 logging.basicConfig(
@@ -111,48 +123,54 @@ class KindleAPIScraperEnhanced:
             
         return None
 
+    @log_function_call(selenium_logger)
     def setup_driver(self):
         """
-        Настройка Chrome для работы с Kindle Cloud Reader
+        Настройка Firefox для работы с Kindle Cloud Reader
         """
         try:
-            logging.info("Настройка Chrome для работы с Kindle Cloud Reader")
+            selenium_logger.info("Настраиваем Firefox для работы с Kindle Cloud Reader")
             
-            # Настраиваем опции Chrome
+            # Настраиваем опции Firefox
             options = Options()
-            options.add_argument("--window-size=1366,768")
-            options.add_argument("--disable-notifications")
+            options.add_argument("--width=1366")
+            options.add_argument("--height=768")
             
-            # Включаем перехват сетевых запросов (Network domain)
-            options.add_experimental_option("perfLoggingPrefs", {
-                "enableNetwork": True,
-                "enablePage": True
-            })
-            
-            # Добавляем логирование для Chrome
-            options.add_experimental_option("excludeSwitches", ["enable-automation"])
-            options.add_experimental_option("useAutomationExtension", False)
-            options.add_experimental_option("logging", {"performance": "ALL", "browser": "ALL"})
+            # Настраиваем Firefox для логирования
+            options.set_preference("devtools.console.stdout.content", True)
+            options.set_preference("browser.cache.disk.enable", False)
+            options.set_preference("browser.cache.memory.enable", False)
+            options.set_preference("browser.cache.offline.enable", False)
+            options.set_preference("network.http.use-cache", False)
             
             # Инициализируем драйвер
-            service = Service(ChromeDriverManager().install())
-            self.driver = webdriver.Chrome(service=service, options=options)
+            service = Service(GeckoDriverManager().install())
+            self.driver = webdriver.Firefox(service=service, options=options)
+            
+            # Сохраняем скриншот для подтверждения запуска
+            try:
+                log_screenshot(self.driver, "firefox_started")
+            except Exception as screenshot_err:
+                selenium_logger.warning(f"Не удалось сохранить скриншот запуска: {str(screenshot_err)}")
             
             # Устанавливаем скрипт для перехвата запросов
             self.setup_request_interceptor()
             
-            logging.info("Chrome успешно настроен")
+            selenium_logger.info("Firefox успешно настроен")
             return True
             
         except Exception as e:
-            logging.error(f"Ошибка при настройке Chrome: {str(e)}")
+            selenium_logger.error(f"Ошибка при настройке Firefox: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
             return False
 
+    @log_function_call(selenium_logger)
     def setup_request_interceptor(self):
         """
         Устанавливает JavaScript для перехвата и сохранения запросов
         """
         if not self.driver:
+            selenium_logger.error("Нельзя установить перехватчик запросов: драйвер не инициализирован")
             return
             
         interceptor_script = """
@@ -172,27 +190,33 @@ class KindleAPIScraperEnhanced:
                    (url.includes('/api/') || url.includes('/service/') || 
                     url.includes('blob:') || url.startsWith('blob:'))) {
                     
+                    console.log('Captured API request to: ' + url);
+                    
                     // Клонируем ответ (т.к. response.json() можно вызвать только один раз)
                     const clone = response.clone();
                     
                     // Пытаемся получить тело ответа в зависимости от Content-Type
                     const contentType = response.headers.get('Content-Type') || '';
+                    console.log('Content-Type: ' + contentType);
                     
                     if (contentType.includes('application/json')) {
                         // Для JSON данных
                         clone.json().then(data => {
+                            console.log('Parsed JSON data from: ' + url);
                             window.capturedRequests.push({
                                 url: url,
                                 type: 'json',
                                 data: data
                             });
-                        }).catch(e => console.log('Error parsing JSON:', e));
+                        }).catch(e => console.log('Error parsing JSON: ' + e));
                     } 
                     else if (contentType.includes('image/') || url.includes('blob:')) {
                         // Для изображений или blob-данных
                         clone.blob().then(blob => {
+                            console.log('Processing blob/image from: ' + url);
                             const reader = new FileReader();
                             reader.onload = function() {
+                                console.log('Image/blob data converted to base64');
                                 window.capturedImages.push({
                                     url: url,
                                     type: contentType || 'blob',
@@ -200,11 +224,12 @@ class KindleAPIScraperEnhanced:
                                 });
                             };
                             reader.readAsDataURL(blob);
-                        }).catch(e => console.log('Error processing blob:', e));
+                        }).catch(e => console.log('Error processing blob: ' + e));
                     }
                 }
             } catch (e) {
-                console.log('Error in fetch interceptor:', e);
+                console.log('Error in fetch interceptor: ' + e);
+                console.log('Error stack: ' + e.stack);
             }
             
             // Возвращаем оригинальный ответ
@@ -213,21 +238,41 @@ class KindleAPIScraperEnhanced:
         
         // Функция для получения перехваченных запросов
         window.getCapturedRequests = function() {
+            console.log('getCapturedRequests called, count: ' + window.capturedRequests.length);
             return window.capturedRequests;
         };
         
         // Функция для получения перехваченных изображений
         window.getCapturedImages = function() {
+            console.log('getCapturedImages called, count: ' + window.capturedImages.length);
             return window.capturedImages;
         };
         
         console.log('Interceptor installed successfully');
         """
         
-        # Выполняем скрипт
-        self.driver.execute_script(interceptor_script)
-        logging.info("Установлен перехватчик запросов")
+        try:
+            # Выполняем скрипт
+            self.driver.execute_script(interceptor_script)
+            selenium_logger.info("Установлен перехватчик запросов")
+            
+            # Проверяем, успешно ли установлен скрипт
+            check_script = """
+            return typeof window.getCapturedRequests === 'function' && 
+                  typeof window.getCapturedImages === 'function';
+            """
+            is_installed = self.driver.execute_script(check_script)
+            
+            if is_installed:
+                selenium_logger.info("Перехватчик успешно проверен")
+            else:
+                selenium_logger.warning("Перехватчик установлен, но функции не обнаружены")
+                
+        except Exception as e:
+            selenium_logger.error(f"Ошибка при установке перехватчика запросов: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
 
+    @log_function_call(selenium_logger)
     def login_to_amazon(self):
         """
         Входит в аккаунт Amazon
@@ -235,57 +280,74 @@ class KindleAPIScraperEnhanced:
         :return: True если авторизация прошла успешно, иначе False
         """
         if not self.driver or not self.email or not self.password:
-            logging.error("Драйвер не инициализирован или не указаны учетные данные")
+            selenium_logger.error("Драйвер не инициализирован или не указаны учетные данные")
             return False
             
         try:
-            logging.info("Открываем страницу авторизации Amazon")
+            selenium_logger.info("Открываем страницу авторизации Amazon")
             self.driver.get("https://www.amazon.com/ap/signin")
             
+            # Сохраняем скриншот до авторизации
+            log_screenshot(self.driver, "before_login")
+            
             # Ждем загрузки страницы
+            selenium_logger.info("Ожидаем загрузку страницы авторизации")
             WebDriverWait(self.driver, 20).until(
                 EC.presence_of_element_located((By.ID, "ap_email"))
             )
             
             # Вводим email
-            logging.info(f"Вводим email: {self.email}")
+            selenium_logger.info(f"Вводим email: {self.email}")
             email_field = self.driver.find_element(By.ID, "ap_email")
             email_field.clear()
             email_field.send_keys(self.email)
             
             # Нажимаем кнопку "Continue"
+            selenium_logger.info("Нажимаем кнопку Continue")
             continue_button = self.driver.find_element(By.ID, "continue")
             continue_button.click()
             
+            # Сохраняем скриншот перед вводом пароля
+            log_screenshot(self.driver, "before_password")
+            
             # Ждем загрузки страницы для ввода пароля
+            selenium_logger.info("Ожидаем страницу для ввода пароля")
             WebDriverWait(self.driver, 20).until(
                 EC.presence_of_element_located((By.ID, "ap_password"))
             )
             
             # Вводим пароль
-            logging.info("Вводим пароль")
+            selenium_logger.info("Вводим пароль")
             password_field = self.driver.find_element(By.ID, "ap_password")
             password_field.clear()
             password_field.send_keys(self.password)
             
             # Нажимаем кнопку "Sign-In"
+            selenium_logger.info("Нажимаем кнопку Sign-In")
             signin_button = self.driver.find_element(By.ID, "signInSubmit")
             signin_button.click()
             
+            # Сохраняем скриншот после авторизации
+            log_screenshot(self.driver, "after_login")
+            
             # Проверяем, что авторизация прошла успешно
             try:
+                selenium_logger.info("Проверяем успешность авторизации")
                 WebDriverWait(self.driver, 20).until(
                     lambda driver: "amazon.com" in driver.current_url and "ap/signin" not in driver.current_url
                 )
-                logging.info("Авторизация прошла успешно")
+                selenium_logger.info("Авторизация прошла успешно")
                 return True
                 
             except TimeoutException:
-                logging.error("Ошибка авторизации. Проверьте учетные данные.")
+                selenium_logger.error("Ошибка авторизации. Проверьте учетные данные.")
+                log_screenshot(self.driver, "login_error")
                 return False
                 
         except Exception as e:
-            logging.error(f"Ошибка при авторизации: {str(e)}")
+            selenium_logger.error(f"Ошибка при авторизации: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
+            log_screenshot(self.driver, "login_exception")
             return False
 
     def open_kindle_cloud_reader(self):
