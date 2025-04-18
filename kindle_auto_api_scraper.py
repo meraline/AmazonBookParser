@@ -535,6 +535,72 @@ class KindleAutoAPIScraper:
             return []
 
     @log_function_call(parsing_logger)
+    def navigate_with_screenshots(self):
+        """
+        Перелистывает страницы книги и делает скриншот каждой страницы
+        
+        :return: True если успешно, иначе False
+        """
+        try:
+            selenium_logger.info("Начинаем навигацию по страницам книги со скриншотами")
+            
+            # Создаем директорию для скриншотов, если она не существует
+            screenshots_dir = os.path.join(os.getcwd(), "kindle_screenshots")
+            if not os.path.exists(screenshots_dir):
+                os.makedirs(screenshots_dir)
+                selenium_logger.info(f"Создана директория для скриншотов: {screenshots_dir}")
+            
+            # Ждем некоторое время, чтобы интерфейс Kindle полностью загрузился
+            time.sleep(self.page_load_time)
+            
+            # Начинаем с первой страницы
+            current_page = 1
+            max_pages = self.max_wait_time  # Используем max_wait_time в качестве ограничения
+            
+            # Делаем скриншот первой страницы
+            screenshot_path = os.path.join(screenshots_dir, f"page_{current_page:04d}.png")
+            selenium_logger.info(f"Делаем скриншот страницы {current_page}")
+            self.driver.save_screenshot(screenshot_path)
+            selenium_logger.info(f"Скриншот сохранен: {screenshot_path}")
+            
+            # Обрабатываем остальные страницы
+            while current_page < max_pages:
+                # Перелистываем на следующую страницу
+                try:
+                    # Находим body и отправляем ARROW_RIGHT для перелистывания
+                    from selenium.webdriver.common.keys import Keys
+                    body = self.driver.find_element(By.TAG_NAME, "body")
+                    body.send_keys(Keys.ARROW_RIGHT)
+                    
+                    # Ждем загрузки новой страницы
+                    time.sleep(2)  # Увеличенная задержка для надежности
+                    
+                    # Увеличиваем счетчик текущей страницы
+                    current_page += 1
+                    
+                    # Обновляем callback при наличии
+                    if self.current_page_callback:
+                        self.current_page_callback(current_page, max_pages)
+                    
+                    # Делаем скриншот
+                    screenshot_path = os.path.join(screenshots_dir, f"page_{current_page:04d}.png")
+                    selenium_logger.info(f"Делаем скриншот страницы {current_page}")
+                    self.driver.save_screenshot(screenshot_path)
+                    selenium_logger.info(f"Скриншот сохранен: {screenshot_path}")
+                    
+                except Exception as e:
+                    selenium_logger.error(f"Ошибка при перелистывании на страницу {current_page + 1}: {str(e)}")
+                    break
+            
+            selenium_logger.info(f"Навигация завершена. Создано {current_page} скриншотов.")
+            selenium_logger.info(f"Скриншоты сохранены в директории: {screenshots_dir}")
+            return True
+            
+        except Exception as e:
+            selenium_logger.error(f"Ошибка при навигации и создании скриншотов: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
+            return False
+    
     def extract_content_from_api_responses(self, api_responses):
         """
         Извлекает структурированный контент из перехваченных API-ответов
