@@ -313,11 +313,18 @@ def start_scraping():
         # Проверяем наличие URL
         if not book_url:
             return jsonify({"status": "error", "message": "URL книги не указан"})
+            
+        # Получаем дополнительные параметры для автоматической пагинации
+        try:
+            page_count = int(request.form.get('page_count', 50))
+            auto_paginate = bool(int(request.form.get('auto_paginate', 1)))
+        except ValueError:
+            return jsonify({"status": "error", "message": "Неверный формат параметров пагинации"})
         
-        # Запускаем веб-скрапер в отдельном потоке
+        # Запускаем веб-скрапер в отдельном потоке с параметрами пагинации
         threading.Thread(
             target=run_web_scraper,
-            args=(book_url, output_file)
+            args=(book_url, output_file, page_count, auto_paginate)
         ).start()
     
     else:

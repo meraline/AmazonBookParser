@@ -29,6 +29,8 @@ class KindleWebScraper:
         self.page_count = page_count
         self.auto_paginate = auto_paginate
         self.current_page = 0
+        self.current_page_callback = None
+        self.stop_requested = False
         
         # Устанавливаем заголовки для имитации браузера
         self.headers = {
@@ -194,11 +196,21 @@ class KindleWebScraper:
             
             # Перебираем страницы
             for page_num in range(1, self.page_count + 1):
+                # Проверяем флаг остановки
+                if self.stop_requested:
+                    logging.info("Stop requested, interrupting pagination")
+                    break
+                    
                 if page_num > 1:
                     # Сохраняем прогресс после каждой страницы
                     self.save_text()
                 
                 self.current_page = page_num
+                
+                # Обновляем статус через callback, если он установлен
+                if self.current_page_callback:
+                    self.current_page_callback(self.current_page, self.page_count)
+                
                 page_url = page_url_template.format(page_num)
                 
                 logging.info(f"Fetching page {page_num} of {self.page_count}: {page_url}")
@@ -221,19 +233,36 @@ class KindleWebScraper:
                                 logging.info(f"Extracted {len(text)} characters from page {page_num}")
                     else:
                         # Если не нашли специальные элементы, попробуем извлечь весь текст страницы
-                        text = trafilatura.extract(response.text)
-                        if text:
-                            self.text_content.append(f"Page {page_num}:\n{text}")
-                            logging.info(f"Extracted {len(text)} characters from page {page_num} using trafilatura")
-                        else:
-                            logging.warning(f"No text found on page {page_num}")
+                        try:
+                            text = trafilatura.extract(response.text)
+                            if text:
+                                self.text_content.append(f"Page {page_num}:\n{text}")
+                                logging.info(f"Extracted {len(text)} characters from page {page_num} using trafilatura")
+                            else:
+                                # Если trafilatura не смогла извлечь текст, извлекаем весь текст страницы через BeautifulSoup
+                                text = soup.get_text(strip=True)
+                                if text:
+                                    self.text_content.append(f"Page {page_num} (raw):\n{text}")
+                                    logging.info(f"Extracted {len(text)} characters as raw text from page {page_num}")
+                                else:
+                                    logging.warning(f"No text found on page {page_num}")
+                        except Exception as tex:
+                            # Если с trafilatura проблемы, используем BeautifulSoup
+                            logging.warning(f"Error using trafilatura: {tex}, falling back to BeautifulSoup")
+                            text = soup.get_text(strip=True)
+                            if text:
+                                self.text_content.append(f"Page {page_num} (raw):\n{text}")
+                                logging.info(f"Extracted {len(text)} characters as raw text from page {page_num}")
                 else:
                     logging.error(f"Failed to fetch page {page_num}, status code: {response.status_code}")
                 
                 # Пауза между запросами, чтобы не перегружать сервер
                 time.sleep(2)
             
-            logging.info(f"Pagination completed, processed {self.page_count} pages")
+            logging.info(f"Pagination completed, processed {self.current_page} of {self.page_count} pages")
+            
+            # Финальное сохранение всего контента
+            self.save_text()
             return True
             
         except Exception as e:
