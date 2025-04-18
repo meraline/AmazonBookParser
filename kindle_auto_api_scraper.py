@@ -373,7 +373,7 @@ class KindleAutoAPIScraper:
         :return: True если удалось открыть, иначе False
         """
         try:
-            logging.info("Открываем Kindle Cloud Reader")
+            selenium_logger.info("Открываем Kindle Cloud Reader")
             self.driver.get("https://read.amazon.com")
             
             # Ждем загрузки страницы
@@ -383,14 +383,15 @@ class KindleAutoAPIScraper:
             
             # Проверяем, не перенаправило ли нас на страницу авторизации
             if "ap/signin" in self.driver.current_url:
-                logging.info("Требуется авторизация")
+                selenium_logger.info("Требуется авторизация")
                 return self.login()
                 
-            logging.info("Kindle Cloud Reader успешно открыт")
+            selenium_logger.info("Kindle Cloud Reader успешно открыт")
             return True
             
         except Exception as e:
-            logging.error(f"Ошибка при открытии Kindle Cloud Reader: {str(e)}")
+            selenium_logger.error(f"Ошибка при открытии Kindle Cloud Reader: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
             return False
 
     def open_book(self):
@@ -400,7 +401,7 @@ class KindleAutoAPIScraper:
         :return: True если удалось открыть, иначе False
         """
         if not self.book_url and not self.asin:
-            logging.error("Не указан URL книги или ASIN")
+            selenium_logger.error("Не указан URL книги или ASIN")
             return False
             
         try:
@@ -410,29 +411,90 @@ class KindleAutoAPIScraper:
             if not url_to_open and self.asin:
                 url_to_open = f"https://read.amazon.com/reader?asin={self.asin}"
                 
-            logging.info(f"Открываем книгу по URL: {url_to_open}")
+            selenium_logger.info(f"Открываем книгу по URL: {url_to_open}")
             self.driver.get(url_to_open)
             
             # Ждем загрузки книги
-            time.sleep(self.page_load_time)
+            time.sleep(self.page_load_time * 2)  # Увеличиваем время ожидания
             
             # Проверяем, что книга открылась
             try:
-                # Проверяем наличие элементов интерфейса Kindle Reader
+                # Проверяем наличие элементов интерфейса Kindle Reader с расширенным набором условий
                 WebDriverWait(self.driver, self.max_wait_time).until(
-                    lambda driver: "read.amazon.com/reader" in driver.current_url or 
-                                  "read.amazon.com/kp" in driver.current_url
+                    lambda driver: (
+                        "read.amazon.com/reader" in driver.current_url or 
+                        "read.amazon.com/kp" in driver.current_url or
+                        "read.amazon.com/?asin=" in driver.current_url or
+                        f"asin={self.asin}" in driver.current_url
+                    )
                 )
                 
-                logging.info("Книга успешно открыта")
+                # Проверяем, что мы не на странице входа
+                if "ap/signin" in self.driver.current_url:
+                    selenium_logger.info("Перенаправление на страницу входа. Необходима авторизация.")
+                    # Делаем скриншот для анализа страницы логина
+                    log_screenshot(self.driver, "amazon_login_screen")
+                    
+                    # Попытка авторизации
+                    if self.email and self.password:
+                        selenium_logger.info("Выполняем автоматическую авторизацию")
+                        return self.login()
+                    else:
+                        selenium_logger.info("Требуется ручная авторизация. Ожидаем действий пользователя.")
+                        
+                        # Ждем пока пользователь не авторизуется
+                        print("\n" + "="*80)
+                        print("НЕОБХОДИМА АВТОРИЗАЦИЯ:")
+                        print("1. Пожалуйста, войдите в свой аккаунт Amazon в открывшемся окне браузера")
+                        print("2. После успешного входа нажмите ENTER для продолжения")
+                        print("="*80 + "\n")
+                        input()
+                        
+                        # Проверяем, что авторизация прошла успешно
+                        if "ap/signin" in self.driver.current_url:
+                            selenium_logger.error("Авторизация не выполнена")
+                            return False
+                
+                # Дополнительная задержка после успешного открытия
+                time.sleep(5)
+                
+                # Делаем скриншот для подтверждения
+                try:
+                    log_screenshot(self.driver, "book_opened")
+                except Exception as screenshot_err:
+                    selenium_logger.warning(f"Не удалось сделать скриншот: {str(screenshot_err)}")
+                
+                # Логируем состояние страницы
+                try:
+                    log_page_content(self.driver, "book_opened_page")
+                except Exception as content_err:
+                    selenium_logger.warning(f"Не удалось сохранить содержимое страницы: {str(content_err)}")
+                
+                selenium_logger.info("Книга успешно открыта")
                 return True
                 
             except TimeoutException:
-                logging.error("Ошибка при открытии книги. Проверьте URL или ASIN.")
+                selenium_logger.error("Таймаут при открытии книги. Проверьте URL или ASIN.")
+                
+                # Делаем скриншот текущего состояния страницы для отладки
+                try:
+                    log_screenshot(self.driver, "book_opening_timeout")
+                except Exception as screenshot_err:
+                    selenium_logger.warning(f"Не удалось сделать скриншот при таймауте: {str(screenshot_err)}")
+                
+                # Попробуем использовать текущий URL, возможно книга уже открыта
+                current_url = self.driver.current_url
+                selenium_logger.info(f"Текущий URL: {current_url}")
+                
+                if self.asin in current_url:
+                    selenium_logger.info("ASIN найден в текущем URL, возможно книга открыта")
+                    return True
+                    
                 return False
                 
         except Exception as e:
-            logging.error(f"Ошибка при открытии книги: {str(e)}")
+            selenium_logger.error(f"Ошибка при открытии книги: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
             return False
 
     def capture_network_traffic(self):
@@ -444,7 +506,7 @@ class KindleAutoAPIScraper:
         captured_data = []
         
         try:
-            logging.info("Начинаем перехват сетевого трафика")
+            selenium_logger.info("Начинаем перехват сетевого трафика")
             
             # Включаем режим разработчика в Selenium (открываем DevTools)
             self.driver.execute_script("window.open()")
@@ -496,7 +558,7 @@ class KindleAutoAPIScraper:
             self.driver.switch_to.window(self.driver.window_handles[0])
             
             # Перелистываем несколько страниц для получения контента
-            logging.info("Перелистываем страницы для получения контента")
+            selenium_logger.info("Перелистываем страницы для получения контента")
             for i in range(5):  # Перелистываем 5 страниц
                 # Нажимаем на правую часть экрана для перелистывания вперед
                 try:
@@ -513,10 +575,10 @@ class KindleAutoAPIScraper:
                     if self.current_page_callback:
                         self.current_page_callback(self.current_page, 5)
                         
-                    logging.info(f"Перелистана страница {i+1}")
+                    selenium_logger.info(f"Перелистана страница {i+1}")
                     
                 except Exception as e:
-                    logging.error(f"Ошибка при перелистывании страницы: {str(e)}")
+                    selenium_logger.error(f"Ошибка при перелистывании страницы: {str(e)}")
                     
             # Переходим обратно к окну с DevTools
             self.driver.switch_to.window(self.driver.window_handles[1])
@@ -524,7 +586,7 @@ class KindleAutoAPIScraper:
             # Получаем собранные данные
             captured_data = self.driver.execute_script("return window.getCapturedData();")
             
-            logging.info(f"Перехвачено {len(captured_data)} API-ответов")
+            selenium_logger.info(f"Перехвачено {len(captured_data)} API-ответов")
             
             # Возвращаемся к окну с книгой
             self.driver.switch_to.window(self.driver.window_handles[0])
@@ -532,7 +594,8 @@ class KindleAutoAPIScraper:
             return captured_data
             
         except Exception as e:
-            logging.error(f"Ошибка при перехвате сетевого трафика: {str(e)}")
+            selenium_logger.error(f"Ошибка при перехвате сетевого трафика: {str(e)}")
+            selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
             return []
 
     @log_function_call(parsing_logger)
