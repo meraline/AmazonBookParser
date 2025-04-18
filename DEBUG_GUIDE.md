@@ -1,269 +1,116 @@
 # Руководство по отладке парсера Kindle Cloud Reader
 
-## Содержание
-1. [Структура проекта](#структура-проекта)
-2. [Логирование и отладочная информация](#логирование-и-отладочная-информация)
-3. [Распространенные ошибки и их решения](#распространенные-ошибки-и-их-решения)
-4. [Отладка веб-интерфейса](#отладка-веб-интерфейса)
-5. [Отладка Selenium](#отладка-selenium)
-6. [Отладка API запросов](#отладка-api-запросов)
-7. [Примеры отладки](#примеры-отладки)
-
-## Структура проекта
-
-### Основные компоненты:
-- **main.py**: Веб-интерфейс на Flask, обрабатывает запросы пользователя
-- **kindle_scraper.py**: Базовый скрапер на основе Selenium 
-- **kindle_api_scraper.py**: Скрапер на основе API-запросов к Kindle
-- **kindle_auto_api_scraper.py**: Автоматизированный API-скрапер с Firefox
-- **kindle_api_scraper_enhanced.py**: Улучшенный API-скрапер с Chrome
-- **kindle_web_scraper.py**: Скрапер на основе веб-запросов
-
-### Логи и отладочные файлы:
-- **kindle_scraper.log**: Основной лог для Selenium парсера
-- **kindle_scraper_web.log**: Лог для веб-парсера
-- **kindle_auto_scraper.log**: Лог для авто API-парсера
-- **kindle_enhanced_scraper.log**: Лог для улучшенного API-парсера
-
-## Логирование и отладочная информация
-
-### Уровни логирования (по возрастанию детализации):
-- **ERROR**: Критические ошибки, приводящие к остановке скрапера
-- **WARNING**: Предупреждения о потенциальных проблемах
-- **INFO**: Информационные сообщения о ходе работы скрапера
-- **DEBUG**: Подробная отладочная информация
-
-### Включение подробного логирования:
-В коде каждого скрапера найдите и измените строку настройки логирования:
-```python
-logging.basicConfig(
-    level=logging.INFO,  # Измените на logging.DEBUG для более подробных логов
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='название_файла_логов.log'
-)
-```
-
-### Как читать логи:
-1. Проверяйте хронологию выполнения шагов
-2. Ищите ошибки (ERROR) и предупреждения (WARNING)
-3. Следите за контекстом операций (например, авторизация, открытие книги и т.д.)
-4. Обращайте внимание на время между операциями для выявления задержек
-
 ## Распространенные ошибки и их решения
 
-### Ошибка: "WebDriver.__init__() got an unexpected keyword argument 'capabilities'"
-**Причина**: Устаревший способ инициализации Selenium WebDriver.
-**Решение**: 
-```python
-# Старый способ:
-self.driver = webdriver.Firefox(service=service, options=options, capabilities=capabilities)
+### 1. "binary is not a Firefox executable"
 
-# Новый способ:
-options.log.level = "trace"  # Для Firefox
-# Или для Chrome:
-options.add_experimental_option("logging", {"performance": "ALL", "browser": "ALL"})
+**Причина:** Firefox не найден в стандартных путях системы.
+
+**Решение:**
+1. Установите Firefox, если он не установлен
+2. В коде `kindle_auto_api_scraper.py` найдите список `firefox_paths` и добавьте правильный путь к вашему исполняемому файлу Firefox
+   ```python
+   firefox_paths = [
+       "/usr/bin/firefox",
+       "/path/to/your/firefox"  # Добавьте ваш путь здесь
+   ]
+   ```
+
+### 2. "perfLoggingPrefs specified, but performance logging was not enabled"
+
+**Причина:** Проблема совместимости с вашей версией Chrome.
+
+**Решение:**
+Закомментированы опции перехвата в Chrome, которые вызывали ошибку:
+```python
+# options.add_argument("--auto-open-devtools-for-tabs")
+# options.add_experimental_option("perfLoggingPrefs", {...})
+```
+
+### 3. "Read timed out" при установке драйвера
+
+**Причина:** Таймаут при загрузке драйвера с сервера GitHub.
+
+**Решения:**
+1. Скачайте драйверы вручную:
+   - geckodriver: https://github.com/mozilla/geckodriver/releases
+   - chromedriver: https://chromedriver.chromium.org/downloads
+2. Поместите драйверы в рабочую директорию (там, где запускаете скрипт)
+3. Парсер автоматически использует локальные драйверы при их наличии
+
+### 4. "GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout'"
+
+**Причина:** Устаревшая версия webdriver-manager.
+
+**Решение:**
+1. Обновите webdriver-manager: `pip install --upgrade webdriver-manager`
+2. Или уберите аргумент timeout (уже исправлено в коде)
+
+### 5. Ошибки при авторизации Amazon
+
+**Причина:** Защита Amazon от автоматизированных входов.
+
+**Решения:**
+1. Используйте более медленный ввод (добавлены задержки между нажатиями)
+2. Добавьте обработку двухфакторной аутентификации, если она включена
+3. Временное решение: войдите вручную, затем передайте куки в скрипт
+
+## Анализ логов и отладка
+
+### Лог-файлы
+
+Программа создает несколько лог-файлов:
+- `selenium_debug.log` - логи взаимодействия с браузером
+- `api_debug.log` - логи API-запросов
+- `parsing_debug.log` - логи извлечения данных
+- `kindle_auto_scraper.log` - общие логи
+- `environment_report.json` - информация о системе при ошибках
+
+### Отладка с помощью скриншотов
+
+При ошибках скрипт автоматически сохраняет скриншоты в текущую директорию:
+- `firefox_direct_started.png` - Firefox запущен успешно
+- `chrome_direct_started.png` - Chrome запущен успешно
+- `login_page_before.png` - страница перед авторизацией
+- `login_failure.png` - ошибка авторизации
+- `error_state.png` - состояние при возникновении ошибки
+
+### Создание отчета о системе
+
+Если у вас возникают неизвестные ошибки, запустите функцию для создания диагностического отчета:
+
+```python
+from kindle_auto_api_scraper import KindleAutoAPIScraper
+
+scraper = KindleAutoAPIScraper()
+env_report = scraper._generate_environment_report()
+print(f"Отчет сохранен в {env_report}")
+```
+
+## Как модифицировать код для решения проблем
+
+### Пример 1: Использование конкретного пути к браузеру
+
+```python
+options = FirefoxOptions()
+options.binary_location = "/точный/путь/к/вашему/firefox"
+self.driver = webdriver.Firefox(options=options)
+```
+
+### Пример 2: Отключение логирования перехвата трафика
+
+```python
+options = ChromeOptions()
+# Отключаем опции перехвата, которые вызывают ошибку
+# options.add_argument("--auto-open-devtools-for-tabs")
+# options.add_experimental_option("perfLoggingPrefs", {...})
+```
+
+### Пример 3: Ручное указание пути к драйверу
+
+```python
+from selenium.webdriver.firefox.service import Service
+
+service = Service(executable_path="/путь/к/вашему/geckodriver")
 self.driver = webdriver.Firefox(service=service, options=options)
 ```
-
-### Ошибка: "Message: Unable to find element"
-**Причина**: Элемент не найден на странице или еще не загрузился.
-**Решение**: 
-1. Увеличьте время ожидания:
-```python
-WebDriverWait(self.driver, 30).until(...)  # Увеличьте время с 20 до 30 секунд
-```
-2. Проверьте селектор элемента (может быть изменен в новой версии сайта)
-3. Добавьте явную задержку: `time.sleep(5)`
-
-### Ошибка: "selenium.common.exceptions.TimeoutException"
-**Причина**: Превышено время ожидания загрузки элемента или страницы.
-**Решение**:
-1. Убедитесь, что URL и учетные данные верны
-2. Проверьте стабильность интернет-соединения
-3. Увеличьте параметр `page_load_time`
-4. Добавьте обработку капчи, если она появляется
-
-### Ошибка: "selenium.common.exceptions.WebDriverException: Message: Process unexpectedly closed"
-**Причина**: Драйвер браузера завершил работу неожиданно.
-**Решение**:
-1. Убедитесь, что установлены совместимые версии драйвера и браузера
-2. Отключите headless режим для отладки
-3. Проверьте наличие системных ресурсов
-
-### Ошибка: "Access denied" или "No permission" при доступе к API
-**Причина**: Ограничения доступа к API Amazon.
-**Решение**:
-1. Убедитесь в правильности авторизации
-2. Проверьте, что вы имеете право доступа к данной книге
-3. Используйте техники обхода ограничений (медленная навигация, имитация поведения пользователя)
-
-## Отладка веб-интерфейса
-
-### Проблемы с отправкой форм:
-1. Проверьте консоль браузера (F12) на наличие ошибок JavaScript
-2. Убедитесь, что формы содержат все необходимые поля 
-3. Проверьте правильность маршрутов в Flask:
-```python
-@app.route('/start_enhanced_scraping', methods=['POST'])
-```
-
-### Проблемы с отображением статуса:
-1. Проверьте работу функции `/get_status`
-2. Убедитесь, что передаются актуальные данные о прогрессе
-3. Проверьте JavaScript для обновления прогресс-бара
-
-## Отладка Selenium
-
-### Отключение безголового (headless) режима:
-Измените настройки веб-драйвера:
-```python
-options = Options()
-# options.add_argument("-headless")  # Закомментируйте для отладки
-```
-
-### Добавление скриншотов при ошибках:
-```python
-def take_screenshot(driver, name="error"):
-    try:
-        driver.save_screenshot(f"{name}_{time.time()}.png")
-    except Exception:
-        pass
-        
-# Использование:
-except Exception as e:
-    take_screenshot(self.driver, "login_error")
-    logging.error(f"Ошибка: {str(e)}")
-```
-
-### Отладка JavaScript в контексте страницы:
-```python
-# Выполнение JavaScript для отладки
-debug_info = self.driver.execute_script("""
-    return {
-        url: window.location.href,
-        cookies: document.cookie,
-        userAgent: navigator.userAgent,
-        elements: document.querySelectorAll('div.book-content').length
-    }
-""")
-logging.debug(f"Отладочная информация: {debug_info}")
-```
-
-## Отладка API запросов
-
-### Сохранение перехваченных API-запросов:
-```python
-def save_captured_requests(requests_data, filename="captured_requests.json"):
-    with open(filename, "w", encoding="utf-8") as f:
-        json.dump(requests_data, f, ensure_ascii=False, indent=2)
-```
-
-### Анализ структуры API-ответов:
-1. Используйте инспектор сети в DevTools (F12 -> Network)
-2. Фильтруйте запросы по ключевым словам (reader, content, getFileToken)
-3. Сохраняйте ответы для анализа и создания моделей данных
-
-## Примеры отладки
-
-### Пример 1: Отладка авторизации
-
-```
-[2023-09-15 10:35:42] - INFO - Открываем страницу авторизации Amazon
-[2023-09-15 10:35:45] - INFO - Дождались загрузки поля email
-[2023-09-15 10:35:46] - INFO - Вводим email: user@example.com
-[2023-09-15 10:35:47] - INFO - Нажимаем кнопку Continue
-[2023-09-15 10:35:50] - INFO - Дождались загрузки поля пароля
-[2023-09-15 10:35:51] - INFO - Вводим пароль
-[2023-09-15 10:35:52] - INFO - Нажимаем кнопку Sign-In
-[2023-09-15 10:36:10] - ERROR - Ошибка авторизации. Проверьте учетные данные.
-```
-**Решение**: Проверить корректность учетных данных, наличие капчи, блокировку IP.
-
-### Пример 2: Отладка загрузки книги
-
-```
-[2023-09-15 10:40:22] - INFO - Открываем книгу по URL: https://read.amazon.com/...
-[2023-09-15 10:40:30] - INFO - Ожидаем загрузки интерфейса книги
-[2023-09-15 10:40:35] - INFO - Книга успешно открыта
-[2023-09-15 10:40:35] - INFO - Извлекаем метаданные книги
-[2023-09-15 10:40:37] - INFO - Название книги: "Quantum Poker"
-[2023-09-15 10:40:37] - INFO - Автор книги: не найден
-[2023-09-15 10:40:38] - INFO - Начинаем перехват сетевого трафика
-[2023-09-15 10:40:40] - INFO - Перелистываем страницу 1 из 20
-[2023-09-15 10:40:45] - ERROR - Ошибка при перелистывании страницы: Element not interactable
-```
-**Решение**: 
-1. Увеличить время ожидания загрузки страницы
-2. Изменить способ перелистывания (например, использовать клавиши вместо клика)
-3. Проверить, нет ли на странице перекрывающих элементов
-
-### Пример 3: Отладка извлечения содержимого
-
-```
-[2023-09-15 10:50:12] - INFO - Перехвачено 8 API-ответов
-[2023-09-15 10:50:12] - DEBUG - URL запроса: https://read.amazon.com/api/...
-[2023-09-15 10:50:13] - INFO - Обработка данных из API-ответов
-[2023-09-15 10:50:14] - WARNING - Не удалось извлечь содержимое из API-ответа: KeyError 'bookId'
-[2023-09-15 10:50:15] - INFO - Извлечено 5 параграфов текста
-[2023-09-15 10:50:16] - INFO - Извлечено 2 изображения
-[2023-09-15 10:50:17] - INFO - Сохраняем результаты
-```
-**Решение**:
-1. Проверить структуру API-ответов (могла измениться)
-2. Обновить логику извлечения ключей
-3. Добавить более гибкую обработку ошибок
-
-## Дополнительные советы по отладке
-
-1. **Используйте постепенный подход**: Отлаживайте по одной функциональности за раз
-2. **Сохраняйте промежуточные данные**: Записывайте HTML, API-ответы и другие промежуточные результаты
-3. **Добавляйте искусственные задержки**: Иногда Amazon блокирует слишком быстрые действия  
-4. **Эмулируйте поведение человека**: Добавьте случайные паузы, перемещение мыши
-5. **Проверяйте совместимость**: Amazon периодически обновляет интерфейс
-6. **Используйте разные браузеры**: Протестируйте в Chrome и Firefox
-
-## Шаблон запроса для поддержки
-В случае сложной проблемы, используйте следующий шаблон для детализации:
-
-```
-Проблема: [Краткое описание]
-Скрипт: [Название файла скрипта]
-Шаг: [На каком шаге возникла ошибка]
-Ошибка: [Точный текст ошибки]
-Логи: [Соответствующие строки из логов]
-Окружение: [Версии Python, Selenium, браузера]
-Ожидаемое поведение: [Что должно было произойти]
-Попытки решения: [Что уже пробовали]
-```
-
-## Утилиты для отладки
-
-### Проверка состояния системы:
-```bash
-python -m selenium.webdriver.common.service
-```
-
-### Проверка версии webdriver и браузера:
-```python
-def check_browser_versions():
-    from selenium import webdriver
-    from selenium.webdriver.chrome.service import Service as ChromeService
-    from webdriver_manager.chrome import ChromeDriverManager
-    
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
-    print(f"Browser Version: {driver.capabilities['browserVersion']}")
-    print(f"Driver Version: {driver.capabilities['chrome']['chromedriverVersion'].split(' ')[0]}")
-    driver.quit()
-```
-
-### Тест сетевых возможностей:
-```python
-def test_network():
-    import requests
-    print(f"Доступ к Amazon: {requests.get('https://www.amazon.com').status_code}")
-    print(f"Доступ к Kindle: {requests.get('https://read.amazon.com').status_code}")
-```
-
----
-
-Этот документ будет обновляться с новыми методами отладки по мере развития проекта.

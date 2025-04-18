@@ -1,0 +1,781 @@
+(base) analityk@ofis:~/Документы/github/AmazonBookParser-1$ python main.py
+2025-04-18 15:58:36,908 - DEBUG - Модуль requests успешно пропатчен для логирования
+2025-04-18 15:58:36,908 - INFO - Модуль kindle_auto_api_scraper инициализирован
+2025-04-18 15:58:36,908 - INFO - Модуль kindle_auto_api_scraper инициализирован
+2025-04-18 15:58:36,908 - INFO - Модуль kindle_auto_api_scraper инициализирован
+ * Serving Flask app 'main'
+ * Debug mode: on
+2025-04-18 15:58:36,918 - INFO - WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.31.18:5000
+2025-04-18 15:58:36,918 - INFO - WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.31.18:5000
+2025-04-18 15:58:36,918 - INFO - WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.31.18:5000
+2025-04-18 15:58:36,918 - INFO - Press CTRL+C to quit
+2025-04-18 15:58:36,918 - INFO - Press CTRL+C to quit
+2025-04-18 15:58:36,918 - INFO - Press CTRL+C to quit
+2025-04-18 15:58:36,922 - INFO -  * Restarting with watchdog (inotify)
+2025-04-18 15:58:36,922 - INFO -  * Restarting with watchdog (inotify)
+2025-04-18 15:58:36,922 - INFO -  * Restarting with watchdog (inotify)
+2025-04-18 15:58:37,331 - DEBUG - Модуль requests успешно пропатчен для логирования
+2025-04-18 15:58:37,332 - INFO - Модуль kindle_auto_api_scraper инициализирован
+2025-04-18 15:58:37,332 - INFO - Модуль kindle_auto_api_scraper инициализирован
+2025-04-18 15:58:37,332 - INFO - Модуль kindle_auto_api_scraper инициализирован
+2025-04-18 15:58:37,341 - WARNING -  * Debugger is active!
+2025-04-18 15:58:37,341 - WARNING -  * Debugger is active!
+2025-04-18 15:58:37,341 - WARNING -  * Debugger is active!
+2025-04-18 15:58:37,341 - INFO -  * Debugger PIN: 143-214-449
+2025-04-18 15:58:37,341 - INFO -  * Debugger PIN: 143-214-449
+2025-04-18 15:58:37,341 - INFO -  * Debugger PIN: 143-214-449
+2025-04-18 15:58:51,601 - INFO - 127.0.0.1 - - [18/Apr/2025 15:58:51] "GET /test_auto_api_scraper HTTP/1.1" 200 -
+2025-04-18 15:58:51,601 - INFO - 127.0.0.1 - - [18/Apr/2025 15:58:51] "GET /test_auto_api_scraper HTTP/1.1" 200 -
+2025-04-18 15:58:51,601 - INFO - 127.0.0.1 - - [18/Apr/2025 15:58:51] "GET /test_auto_api_scraper HTTP/1.1" 200 -
+2025-04-18 15:58:52,413 - INFO - 127.0.0.1 - - [18/Apr/2025 15:58:52] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 15:58:52,413 - INFO - 127.0.0.1 - - [18/Apr/2025 15:58:52] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 15:58:52,413 - INFO - 127.0.0.1 - - [18/Apr/2025 15:58:52] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 15:59:24,808 - INFO - 127.0.0.1 - - [18/Apr/2025 15:59:24] "POST /start_scraping HTTP/1.1" 200 -
+2025-04-18 15:59:24,808 - INFO - 127.0.0.1 - - [18/Apr/2025 15:59:24] "POST /start_scraping HTTP/1.1" 200 -
+2025-04-18 15:59:24,808 - DEBUG - НАЧАЛО run - Аргументы: (<kindle_auto_api_scraper.KindleAutoAPIScraper object at 0x7e2468351970>,), Kwargs: {}
+2025-04-18 15:59:24,808 - INFO - 127.0.0.1 - - [18/Apr/2025 15:59:24] "POST /start_scraping HTTP/1.1" 200 -
+2025-04-18 15:59:24,809 - INFO - Запускаем процесс извлечения книги
+2025-04-18 15:59:24,809 - INFO - Запускаем процесс извлечения книги
+2025-04-18 15:59:24,809 - INFO - Запускаем процесс извлечения книги
+2025-04-18 15:59:24,809 - INFO - Запускаем процесс извлечения книги
+2025-04-18 15:59:24,809 - INFO - URL книги: https://read.amazon.com/?x-client-id=ads-store&_encoding=UTF8&asin=B009SE1Z9E&consumptionLimitReached=false&hasMultimedia=false&requiredCapabilities=EBOK_PURCHASE_ALLOWED&ref_=ast_author_rff
+2025-04-18 15:59:24,809 - INFO - URL книги: https://read.amazon.com/?x-client-id=ads-store&_encoding=UTF8&asin=B009SE1Z9E&consumptionLimitReached=false&hasMultimedia=false&requiredCapabilities=EBOK_PURCHASE_ALLOWED&ref_=ast_author_rff
+2025-04-18 15:59:24,809 - INFO - URL книги: https://read.amazon.com/?x-client-id=ads-store&_encoding=UTF8&asin=B009SE1Z9E&consumptionLimitReached=false&hasMultimedia=false&requiredCapabilities=EBOK_PURCHASE_ALLOWED&ref_=ast_author_rff
+2025-04-18 15:59:24,809 - INFO - URL книги: https://read.amazon.com/?x-client-id=ads-store&_encoding=UTF8&asin=B009SE1Z9E&consumptionLimitReached=false&hasMultimedia=false&requiredCapabilities=EBOK_PURCHASE_ALLOWED&ref_=ast_author_rff
+2025-04-18 15:59:24,810 - INFO - ASIN книги: B009SE1Z9E
+2025-04-18 15:59:24,810 - INFO - ASIN книги: B009SE1Z9E
+2025-04-18 15:59:24,810 - INFO - ASIN книги: B009SE1Z9E
+2025-04-18 15:59:24,810 - INFO - ASIN книги: B009SE1Z9E
+2025-04-18 15:59:24,810 - INFO - Настраиваем веб-драйвер
+2025-04-18 15:59:24,810 - INFO - Настраиваем веб-драйвер
+2025-04-18 15:59:24,810 - INFO - Настраиваем веб-драйвер
+2025-04-18 15:59:24,810 - INFO - Настраиваем веб-драйвер
+2025-04-18 15:59:24,811 - DEBUG - НАЧАЛО setup_driver - Аргументы: (<kindle_auto_api_scraper.KindleAutoAPIScraper object at 0x7e2468351970>,), Kwargs: {}
+2025-04-18 15:59:24,811 - INFO - Пробуем настроить локально установленный браузер
+2025-04-18 15:59:24,811 - INFO - Пробуем настроить локально установленный браузер
+2025-04-18 15:59:24,811 - INFO - Пробуем настроить локально установленный браузер
+2025-04-18 15:59:24,811 - INFO - Пробуем настроить локально установленный браузер
+2025-04-18 15:59:24,811 - INFO - Пробуем локальный Firefox
+2025-04-18 15:59:24,811 - INFO - Пробуем локальный Firefox
+2025-04-18 15:59:24,811 - INFO - Пробуем локальный Firefox
+2025-04-18 15:59:24,811 - INFO - Пробуем локальный Firefox
+2025-04-18 15:59:24,813 - INFO - 127.0.0.1 - - [18/Apr/2025 15:59:24] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 15:59:24,813 - INFO - 127.0.0.1 - - [18/Apr/2025 15:59:24] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 15:59:24,813 - INFO - 127.0.0.1 - - [18/Apr/2025 15:59:24] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 15:59:25,378 - WARNING - Не удалось запустить локальный Firefox: Message: binary is not a Firefox executable
+
+2025-04-18 15:59:25,378 - WARNING - Не удалось запустить локальный Firefox: Message: binary is not a Firefox executable
+
+2025-04-18 15:59:25,378 - WARNING - Не удалось запустить локальный Firefox: Message: binary is not a Firefox executable
+
+2025-04-18 15:59:25,378 - WARNING - Не удалось запустить локальный Firefox: Message: binary is not a Firefox executable
+
+2025-04-18 15:59:25,379 - INFO - Пробуем локальный Chrome
+2025-04-18 15:59:25,379 - INFO - Пробуем локальный Chrome
+2025-04-18 15:59:25,379 - INFO - Пробуем локальный Chrome
+2025-04-18 15:59:25,379 - INFO - Пробуем локальный Chrome
+2025-04-18 15:59:25,813 - INFO - 127.0.0.1 - - [18/Apr/2025 15:59:25] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 15:59:25,813 - INFO - 127.0.0.1 - - [18/Apr/2025 15:59:25] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 15:59:25,813 - INFO - 127.0.0.1 - - [18/Apr/2025 15:59:25] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 15:59:26,461 - WARNING - Не удалось запустить локальный Chrome: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+2025-04-18 15:59:26,461 - WARNING - Не удалось запустить локальный Chrome: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+2025-04-18 15:59:26,461 - WARNING - Не удалось запустить локальный Chrome: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+2025-04-18 15:59:26,461 - WARNING - Не удалось запустить локальный Chrome: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+2025-04-18 15:59:26,461 - WARNING - Не удалось настроить браузер напрямую: Firefox error: Message: binary is not a Firefox executable
+, Chrome error: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+2025-04-18 15:59:26,461 - WARNING - Не удалось настроить браузер напрямую: Firefox error: Message: binary is not a Firefox executable
+, Chrome error: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+2025-04-18 15:59:26,461 - WARNING - Не удалось настроить браузер напрямую: Firefox error: Message: binary is not a Firefox executable
+, Chrome error: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+2025-04-18 15:59:26,461 - WARNING - Не удалось настроить браузер напрямую: Firefox error: Message: binary is not a Firefox executable
+, Chrome error: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+2025-04-18 15:59:26,462 - INFO - Пробуем установить браузерный драйвер...
+2025-04-18 15:59:26,462 - INFO - Пробуем установить браузерный драйвер...
+2025-04-18 15:59:26,462 - INFO - Пробуем установить браузерный драйвер...
+2025-04-18 15:59:26,462 - INFO - Пробуем установить браузерный драйвер...
+2025-04-18 15:59:26,462 - INFO - Пробуем установить драйвер и запустить браузер
+2025-04-18 15:59:26,462 - INFO - Пробуем установить драйвер и запустить браузер
+2025-04-18 15:59:26,462 - INFO - Пробуем установить драйвер и запустить браузер
+2025-04-18 15:59:26,462 - INFO - Пробуем установить драйвер и запустить браузер
+2025-04-18 15:59:26,462 - INFO - Устанавливаем geckodriver
+2025-04-18 15:59:26,462 - INFO - Устанавливаем geckodriver
+2025-04-18 15:59:26,462 - INFO - Устанавливаем geckodriver
+2025-04-18 15:59:26,462 - INFO - Устанавливаем geckodriver
+2025-04-18 15:59:26,462 - WARNING - Не удалось установить и запустить Firefox: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout'
+2025-04-18 15:59:26,462 - WARNING - Не удалось установить и запустить Firefox: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout'
+2025-04-18 15:59:26,462 - WARNING - Не удалось установить и запустить Firefox: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout'
+2025-04-18 15:59:26,462 - WARNING - Не удалось установить и запустить Firefox: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout'
+2025-04-18 15:59:26,462 - INFO - Устанавливаем chromedriver
+2025-04-18 15:59:26,462 - INFO - Устанавливаем chromedriver
+2025-04-18 15:59:26,462 - INFO - Устанавливаем chromedriver
+2025-04-18 15:59:26,462 - INFO - Устанавливаем chromedriver
+2025-04-18 15:59:26,463 - ERROR - Не удалось установить и запустить Chrome: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+2025-04-18 15:59:26,463 - ERROR - Не удалось установить и запустить Chrome: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+2025-04-18 15:59:26,463 - ERROR - Не удалось установить и запустить Chrome: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+2025-04-18 15:59:26,463 - ERROR - Не удалось установить и запустить Chrome: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+2025-04-18 15:59:26,463 - ERROR - Не удалось установить и настроить драйвер: Firefox install error: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout', Chrome install error: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+2025-04-18 15:59:26,463 - ERROR - Не удалось установить и настроить драйвер: Firefox install error: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout', Chrome install error: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+2025-04-18 15:59:26,463 - ERROR - Не удалось установить и настроить драйвер: Firefox install error: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout', Chrome install error: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+2025-04-18 15:59:26,463 - ERROR - Не удалось установить и настроить драйвер: Firefox install error: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout', Chrome install error: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+2025-04-18 15:59:26,466 - ERROR - Трассировка: Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 167, in _setup_direct_browser
+    self.driver = webdriver.Firefox(options=options)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/firefox/webdriver.py", line 71, in __init__
+    super().__init__(command_executor=executor, options=options)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 250, in __init__
+    self.start_session(capabilities)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 342, in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 429, in execute
+    self.error_handler.check_response(response)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidArgumentException: Message: binary is not a Firefox executable
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 196, in _setup_direct_browser
+    self.driver = webdriver.Chrome(options=options)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/chrome/webdriver.py", line 45, in __init__
+    super().__init__(
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/chromium/webdriver.py", line 66, in __init__
+    super().__init__(command_executor=executor, options=options)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 250, in __init__
+    self.start_session(capabilities)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 342, in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 429, in execute
+    self.error_handler.check_response(response)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidArgumentException: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 126, in setup_driver
+    return self._setup_direct_browser()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 205, in _setup_direct_browser
+    raise Exception(f"Firefox error: {str(firefox_error)}, Chrome error: {str(chrome_error)}")
+Exception: Firefox error: Message: binary is not a Firefox executable
+, Chrome error: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 227, in _setup_managed_browser
+    service = FirefoxService(GeckoDriverManager(timeout=240).install())
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 257, in _setup_managed_browser
+    service = ChromeService(ChromeDriverManager(timeout=240).install())
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 133, in setup_driver
+    return self._setup_managed_browser()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 267, in _setup_managed_browser
+    raise Exception(f"Firefox install error: {str(firefox_error)}, Chrome install error: {str(chrome_error)}")
+Exception: Firefox install error: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout', Chrome install error: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+
+2025-04-18 15:59:26,466 - ERROR - Трассировка: Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 167, in _setup_direct_browser
+    self.driver = webdriver.Firefox(options=options)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/firefox/webdriver.py", line 71, in __init__
+    super().__init__(command_executor=executor, options=options)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 250, in __init__
+    self.start_session(capabilities)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 342, in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 429, in execute
+    self.error_handler.check_response(response)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidArgumentException: Message: binary is not a Firefox executable
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 196, in _setup_direct_browser
+    self.driver = webdriver.Chrome(options=options)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/chrome/webdriver.py", line 45, in __init__
+    super().__init__(
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/chromium/webdriver.py", line 66, in __init__
+    super().__init__(command_executor=executor, options=options)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 250, in __init__
+    self.start_session(capabilities)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 342, in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 429, in execute
+    self.error_handler.check_response(response)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidArgumentException: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 126, in setup_driver
+    return self._setup_direct_browser()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 205, in _setup_direct_browser
+    raise Exception(f"Firefox error: {str(firefox_error)}, Chrome error: {str(chrome_error)}")
+Exception: Firefox error: Message: binary is not a Firefox executable
+, Chrome error: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 227, in _setup_managed_browser
+    service = FirefoxService(GeckoDriverManager(timeout=240).install())
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 257, in _setup_managed_browser
+    service = ChromeService(ChromeDriverManager(timeout=240).install())
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 133, in setup_driver
+    return self._setup_managed_browser()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 267, in _setup_managed_browser
+    raise Exception(f"Firefox install error: {str(firefox_error)}, Chrome install error: {str(chrome_error)}")
+Exception: Firefox install error: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout', Chrome install error: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+
+2025-04-18 15:59:26,466 - ERROR - Трассировка: Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 167, in _setup_direct_browser
+    self.driver = webdriver.Firefox(options=options)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/firefox/webdriver.py", line 71, in __init__
+    super().__init__(command_executor=executor, options=options)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 250, in __init__
+    self.start_session(capabilities)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 342, in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 429, in execute
+    self.error_handler.check_response(response)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidArgumentException: Message: binary is not a Firefox executable
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 196, in _setup_direct_browser
+    self.driver = webdriver.Chrome(options=options)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/chrome/webdriver.py", line 45, in __init__
+    super().__init__(
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/chromium/webdriver.py", line 66, in __init__
+    super().__init__(command_executor=executor, options=options)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 250, in __init__
+    self.start_session(capabilities)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 342, in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 429, in execute
+    self.error_handler.check_response(response)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidArgumentException: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 126, in setup_driver
+    return self._setup_direct_browser()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 205, in _setup_direct_browser
+    raise Exception(f"Firefox error: {str(firefox_error)}, Chrome error: {str(chrome_error)}")
+Exception: Firefox error: Message: binary is not a Firefox executable
+, Chrome error: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 227, in _setup_managed_browser
+    service = FirefoxService(GeckoDriverManager(timeout=240).install())
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 257, in _setup_managed_browser
+    service = ChromeService(ChromeDriverManager(timeout=240).install())
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 133, in setup_driver
+    return self._setup_managed_browser()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 267, in _setup_managed_browser
+    raise Exception(f"Firefox install error: {str(firefox_error)}, Chrome install error: {str(chrome_error)}")
+Exception: Firefox install error: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout', Chrome install error: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+
+2025-04-18 15:59:26,466 - ERROR - Трассировка: Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 167, in _setup_direct_browser
+    self.driver = webdriver.Firefox(options=options)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/firefox/webdriver.py", line 71, in __init__
+    super().__init__(command_executor=executor, options=options)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 250, in __init__
+    self.start_session(capabilities)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 342, in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 429, in execute
+    self.error_handler.check_response(response)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidArgumentException: Message: binary is not a Firefox executable
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 196, in _setup_direct_browser
+    self.driver = webdriver.Chrome(options=options)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/chrome/webdriver.py", line 45, in __init__
+    super().__init__(
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/chromium/webdriver.py", line 66, in __init__
+    super().__init__(command_executor=executor, options=options)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 250, in __init__
+    self.start_session(capabilities)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 342, in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 429, in execute
+    self.error_handler.check_response(response)
+  File "/home/analityk/anaconda3/lib/python3.12/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.InvalidArgumentException: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 126, in setup_driver
+    return self._setup_direct_browser()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 205, in _setup_direct_browser
+    raise Exception(f"Firefox error: {str(firefox_error)}, Chrome error: {str(chrome_error)}")
+Exception: Firefox error: Message: binary is not a Firefox executable
+, Chrome error: Message: invalid argument: perfLoggingPrefs specified, but performance logging was not enabled
+Stacktrace:
+#0 0x5ee270a32caa <unknown>
+#1 0x5ee2704ff350 <unknown>
+#2 0x5ee270528282 <unknown>
+#3 0x5ee270581968 <unknown>
+#4 0x5ee2705811aa <unknown>
+#5 0x5ee270582ed2 <unknown>
+#6 0x5ee270582ca6 <unknown>
+#7 0x5ee270574e43 <unknown>
+#8 0x5ee270541b25 <unknown>
+#9 0x5ee270542781 <unknown>
+#10 0x5ee2709fa48f <unknown>
+#11 0x5ee2709fe562 <unknown>
+#12 0x5ee2709e1422 <unknown>
+#13 0x5ee2709fed0e <unknown>
+#14 0x5ee2709c7a1e <unknown>
+#15 0x5ee270a213f8 <unknown>
+#16 0x5ee270a21604 <unknown>
+#17 0x5ee270a318c8 <unknown>
+#18 0x77b450b22ac3 <unknown>
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 227, in _setup_managed_browser
+    service = FirefoxService(GeckoDriverManager(timeout=240).install())
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 257, in _setup_managed_browser
+    service = ChromeService(ChromeDriverManager(timeout=240).install())
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 133, in setup_driver
+    return self._setup_managed_browser()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/analityk/Документы/github/AmazonBookParser-1/kindle_auto_api_scraper.py", line 267, in _setup_managed_browser
+    raise Exception(f"Firefox install error: {str(firefox_error)}, Chrome install error: {str(chrome_error)}")
+Exception: Firefox install error: GeckoDriverManager.__init__() got an unexpected keyword argument 'timeout', Chrome install error: ChromeDriverManager.__init__() got an unexpected keyword argument 'timeout'
+
+2025-04-18 15:59:26,467 - DEBUG - КОНЕЦ setup_driver - Время выполнения: 1.66с - Результат: False
+2025-04-18 15:59:26,467 - ERROR - Не удалось настроить веб-драйвер
+2025-04-18 15:59:26,467 - ERROR - Не удалось настроить веб-драйвер
+2025-04-18 15:59:26,467 - ERROR - Не удалось настроить веб-драйвер
+2025-04-18 15:59:26,467 - ERROR - Не удалось настроить веб-драйвер
+2025-04-18 15:59:26,467 - ERROR - Ошибка при создании отчета окружения: name 'selenium' is not defined
+2025-04-18 15:59:26,467 - ERROR - Ошибка при создании отчета окружения: name 'selenium' is not defined
+2025-04-18 15:59:26,467 - ERROR - Ошибка при создании отчета окружения: name 'selenium' is not defined
+2025-04-18 15:59:26,467 - ERROR - Ошибка при создании отчета окружения: name 'selenium' is not defined
+2025-04-18 15:59:26,468 - DEBUG - КОНЕЦ run - Время выполнения: 1.66с - Результат: False
+2025-04-18 15:59:26,812 - INFO - 127.0.0.1 - - [18/Apr/2025 15:59:26] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 15:59:26,812 - INFO - 127.0.0.1 - - [18/Apr/2025 15:59:26] "GET /get_status HTTP/1.1" 200 -
+2025-04-18 15:59:26,812 - INFO - 127.0.0.1 - - [18/Apr/2025 15:59:26] "GET /get_status HTTP/1.1" 200 -

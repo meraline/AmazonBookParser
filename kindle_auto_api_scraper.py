@@ -142,34 +142,46 @@ class KindleAutoAPIScraper:
         """
         selenium_logger.info("Пробуем настроить локально установленный браузер")
         
-        # Сначала пробуем Firefox
+        # Сначала пробуем Firefox с явным указанием пути
         try:
-            selenium_logger.info("Пробуем локальный Firefox")
+            selenium_logger.info("Пробуем локальный Firefox с поиском пути")
+            
+            # Ищем исполняемый файл Firefox в системе
+            firefox_paths = [
+                "/usr/bin/firefox",
+                "/usr/local/bin/firefox",
+                "/snap/bin/firefox",
+                "/Applications/Firefox.app/Contents/MacOS/firefox-bin",  # macOS
+                "C:\\Program Files\\Mozilla Firefox\\firefox.exe",       # Windows
+                "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe"  # Windows 32-bit
+            ]
+            
+            firefox_binary = None
+            for path in firefox_paths:
+                if os.path.exists(path):
+                    firefox_binary = path
+                    selenium_logger.info(f"Найден Firefox по пути: {path}")
+                    break
+            
             options = FirefoxOptions()
+            if firefox_binary:
+                options.binary_location = firefox_binary
             
-            # Настройки для производительности и лучшего логирования
-            options.set_preference("devtools.netmonitor.enabled", True)
-            options.set_preference("devtools.netmonitor.har.enabled", True)
-            options.set_preference("devtools.netmonitor.har.defaultLogDir", os.getcwd())
-            options.set_preference("devtools.netmonitor.har.enableAutoExportToFile", True)
-            
-            # Добавляем настройки для перехвата сетевого трафика
-            options.set_preference("devtools.console.stdout.content", True)
+            # Минимальные настройки для стабильного запуска
             options.set_preference("browser.cache.disk.enable", False)
             options.set_preference("browser.cache.memory.enable", False)
-            options.set_preference("browser.cache.offline.enable", False)
-            options.set_preference("network.http.use-cache", False)
             
-            # Убираем режим headless для отладки
-            # options.add_argument("-headless")
-            
-            # Создаём драйвер без явного указания пути к geckodriver
-            self.driver = webdriver.Firefox(options=options)
+            # Создаём драйвер, возможно с указанием пути к драйверу
+            geckodriver_path = os.path.join(os.getcwd(), "geckodriver")
+            if os.path.exists(geckodriver_path):
+                selenium_logger.info(f"Используем локальный geckodriver: {geckodriver_path}")
+                service = FirefoxService(executable_path=geckodriver_path)
+                self.driver = webdriver.Firefox(service=service, options=options)
+            else:
+                self.driver = webdriver.Firefox(options=options)
+                
             self.driver.set_window_size(1366, 768)
             selenium_logger.info("Firefox запущен успешно с локальным драйвером")
-            
-            # Сохраняем скриншот для подтверждения
-            log_screenshot(self.driver, "firefox_direct_started")
             
             return True
         except Exception as firefox_error:
@@ -177,27 +189,47 @@ class KindleAutoAPIScraper:
             
             # Если Firefox не удалось запустить, пробуем Chrome
             try:
-                selenium_logger.info("Пробуем локальный Chrome")
+                selenium_logger.info("Пробуем локальный Chrome со стандартными опциями")
+                
+                # Поиск пути к Chrome
+                chrome_paths = [
+                    "/usr/bin/google-chrome",
+                    "/usr/bin/chromium-browser",
+                    "/usr/bin/chromium",
+                    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",  # macOS
+                    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",    # Windows
+                    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"  # Windows 32-bit
+                ]
+                
+                chrome_binary = None
+                for path in chrome_paths:
+                    if os.path.exists(path):
+                        chrome_binary = path
+                        selenium_logger.info(f"Найден Chrome по пути: {path}")
+                        break
+                
                 options = ChromeOptions()
+                if chrome_binary:
+                    options.binary_location = chrome_binary
+                
+                # Минимальные опции для стабильного запуска
                 options.add_argument("--window-size=1366,768")
                 options.add_argument("--disable-notifications")
                 
-                # Для перехвата трафика
-                options.add_argument("--auto-open-devtools-for-tabs")
-                options.add_experimental_option("perfLoggingPrefs", {
-                    "enableNetwork": True,
-                    "enablePage": True
-                })
+                # Отключаем опции перехвата, которые вызывают ошибку
+                # options.add_argument("--auto-open-devtools-for-tabs")
+                # options.add_experimental_option("perfLoggingPrefs", {...})
                 
-                # Убираем режим headless для отладки
-                # options.add_argument("--headless=new")
+                # Проверяем, есть ли локальный chromedriver
+                chromedriver_path = os.path.join(os.getcwd(), "chromedriver")
+                if os.path.exists(chromedriver_path):
+                    selenium_logger.info(f"Используем локальный chromedriver: {chromedriver_path}")
+                    service = ChromeService(executable_path=chromedriver_path)
+                    self.driver = webdriver.Chrome(service=service, options=options)
+                else:
+                    self.driver = webdriver.Chrome(options=options)
                 
-                # Создаём драйвер без явного указания пути к chromedriver
-                self.driver = webdriver.Chrome(options=options)
                 selenium_logger.info("Chrome запущен успешно с локальным драйвером")
-                
-                # Сохраняем скриншот для подтверждения
-                log_screenshot(self.driver, "chrome_direct_started")
                 
                 return True
             except Exception as chrome_error:
@@ -210,26 +242,19 @@ class KindleAutoAPIScraper:
         """
         selenium_logger.info("Пробуем установить драйвер и запустить браузер")
         
-        # Увеличиваем таймаут для установки драйвера
         try:
             # Сначала Firefox с webdriver-manager
             selenium_logger.info("Устанавливаем geckodriver")
             options = FirefoxOptions()
-            options.set_preference("devtools.netmonitor.enabled", True)
-            options.set_preference("devtools.netmonitor.har.enabled", True)
-            options.set_preference("devtools.netmonitor.har.defaultLogDir", os.getcwd())
-            options.set_preference("devtools.netmonitor.har.enableAutoExportToFile", True)
             
-            # Убираем режим headless для отладки
-            # options.add_argument("-headless")
+            # Минимальные настройки для стабильного запуска
+            options.set_preference("browser.cache.disk.enable", False)
+            options.set_preference("browser.cache.memory.enable", False)
             
-            # Используем увеличенный таймаут
-            service = FirefoxService(GeckoDriverManager(timeout=240).install())
+            # Устанавливаем без параметра timeout (который вызывает ошибку в вашей версии)
+            service = FirefoxService(GeckoDriverManager().install())
             self.driver = webdriver.Firefox(service=service, options=options)
             self.driver.set_window_size(1366, 768)
-            
-            # Сохраняем скриншот для подтверждения
-            log_screenshot(self.driver, "firefox_managed_started")
             
             selenium_logger.info("Firefox успешно запущен с установленным драйвером")
             return True
@@ -243,22 +268,13 @@ class KindleAutoAPIScraper:
                 options.add_argument("--window-size=1366,768")
                 options.add_argument("--disable-notifications")
                 
-                # Для перехвата трафика
-                options.add_argument("--auto-open-devtools-for-tabs")
-                options.add_experimental_option("perfLoggingPrefs", {
-                    "enableNetwork": True,
-                    "enablePage": True
-                })
+                # Отключаем опции, которые вызывают ошибку
+                # options.add_argument("--auto-open-devtools-for-tabs")
+                # options.add_experimental_option("perfLoggingPrefs", {...})
                 
-                # Убираем режим headless для отладки
-                # options.add_argument("--headless=new")
-                
-                # Используем увеличенный таймаут
-                service = ChromeService(ChromeDriverManager(timeout=240).install())
+                # Устанавливаем без параметра timeout (который вызывает ошибку в вашей версии)
+                service = ChromeService(ChromeDriverManager().install())
                 self.driver = webdriver.Chrome(service=service, options=options)
-                
-                # Сохраняем скриншот для подтверждения
-                log_screenshot(self.driver, "chrome_managed_started")
                 
                 selenium_logger.info("Chrome успешно запущен с установленным драйвером")
                 return True
