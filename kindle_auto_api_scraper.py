@@ -602,13 +602,13 @@ class KindleAutoAPIScraper:
     @log_function_call(selenium_logger)
     def manual_screenshots_mode(self):
         """
-        Режим ручного перелистывания: ожидает, пока пользователь перелистывает страницы,
-        и делает скриншот после каждого изменения страницы.
+        Режим автоматического обнаружения перелистывания страниц: 
+        отслеживает изменения на странице и автоматически делает скриншоты.
         
         :return: True если успешно, иначе False
         """
         try:
-            selenium_logger.info("Запущен режим ручного перелистывания страниц со скриншотами")
+            selenium_logger.info("Запущен режим автоматического обнаружения перелистывания страниц")
             
             # Создаем директорию для скриншотов, если она не существует
             screenshots_dir = os.path.join(os.getcwd(), "kindle_screenshots")
@@ -622,7 +622,8 @@ class KindleAutoAPIScraper:
             # Начинаем с первой страницы
             current_page = 1
             max_pages = 300  # Безопасное ограничение
-            last_page_source = ""
+            last_page_content_hash = ""
+            last_network_requests = []
             
             # Делаем скриншот первой страницы
             screenshot_path = os.path.join(screenshots_dir, f"page_{current_page:04d}.png")
@@ -630,14 +631,18 @@ class KindleAutoAPIScraper:
             self.driver.save_screenshot(screenshot_path)
             selenium_logger.info(f"Скриншот сохранен: {screenshot_path}")
             
-            # Получаем исходный код первой страницы для сравнения
-            last_page_source = self.driver.page_source
+            # Получаем хеш контента первой страницы
+            page_content = self._get_content_for_comparison()
+            last_page_content_hash = self._hash_content(page_content)
+            
+            # Устанавливаем JavaScript для мониторинга сетевых запросов
+            self._setup_network_monitor()
             
             # Выводим сообщение для пользователя
             print("\n" + "="*80)
-            print("РЕЖИМ РУЧНОГО ПЕРЕЛИСТЫВАНИЯ АКТИВИРОВАН:")
-            print("1. Перелистывайте страницы книги с помощью клавиш или мыши")
-            print("2. Система автоматически делает скриншот каждой новой страницы")
+            print("РЕЖИМ АВТОМАТИЧЕСКОГО ОБНАРУЖЕНИЯ ПЕРЕЛИСТЫВАНИЯ АКТИВИРОВАН:")
+            print("1. Просто перелистывайте страницы книги с помощью клавиш или мыши")
+            print("2. Система автоматически обнаружит изменения и сделает скриншот")
             print("3. Нажмите Ctrl+C в консоли для завершения режима")
             print("="*80 + "\n")
             
@@ -645,60 +650,217 @@ class KindleAutoAPIScraper:
             if self.current_page_callback:
                 self.current_page_callback(current_page, max_pages)
             
-            # Выводим сообщение о начале ручного режима
-            print("\n" + "="*80)
-            print("РЕЖИМ РУЧНОГО ПЕРЕЛИСТЫВАНИЯ АКТИВИРОВАН:")
-            print("1. Перелистывайте страницы книги с помощью клавиш или мыши")
-            print("2. Система автоматически делает скриншот каждой новой страницы")
-            print("3. Введите 'quit' в консоли когда захотите закончить")
-            print("="*80 + "\n")
-            
+            # Ловим сигнал прерывания для корректного завершения
             try:
-                # Основной цикл ожидания изменений
-                while current_page < max_pages:
-                    # Проверяем, хочет ли пользователь завершить работу
-                    print(f"Текущая страница: {current_page}. Для выхода введите 'quit', для продолжения нажмите Enter:")
-                    user_input = input().strip().lower()
-                    if user_input == 'quit':
-                        selenium_logger.info("Пользователь запросил завершение режима ручного скриншота")
-                        break
-                    
-                    # Ждем некоторое время перед проверкой
-                    time.sleep(1)
-                    
-                    # Проверяем, изменилась ли страница
-                    current_page_source = self.driver.page_source
-                    if current_page_source != last_page_source:
-                        # Страница изменилась, делаем скриншот
-                        current_page += 1
+                # Устанавливаем флаг для работы в цикле
+                self.auto_screenshot_running = True
+                
+                # Основной цикл мониторинга изменений
+                while current_page < max_pages and self.auto_screenshot_running:
+                    try:
+                        # Проверяем изменения через несколько способов обнаружения
+                        is_changed = False
+                        change_type = None
                         
-                        # Обновляем callback при наличии
-                        if self.current_page_callback:
-                            self.current_page_callback(current_page, max_pages)
+                        # 1. Проверка изменения содержимого страницы
+                        current_content = self._get_content_for_comparison()
+                        current_content_hash = self._hash_content(current_content)
                         
-                        # Делаем скриншот
-                        screenshot_path = os.path.join(screenshots_dir, f"page_{current_page:04d}.png")
-                        selenium_logger.info(f"Обнаружено изменение страницы! Делаем скриншот страницы {current_page}")
-                        self.driver.save_screenshot(screenshot_path)
-                        selenium_logger.info(f"Скриншот сохранен: {screenshot_path}")
-                        print(f"✓ Сохранен скриншот страницы {current_page}: {screenshot_path}")
+                        if current_content_hash != last_page_content_hash:
+                            is_changed = True
+                            change_type = "content"
                         
-                        # Обновляем исходный код страницы
-                        last_page_source = current_page_source
-                    else:
-                        print("Страница не изменилась с последнего скриншота. Перелистните страницу.")
+                        # 2. Проверка новых сетевых запросов
+                        current_network_requests = self._get_network_requests()
+                        if current_network_requests and current_network_requests != last_network_requests:
+                            new_requests = [req for req in current_network_requests if req not in last_network_requests]
+                            relevant_requests = [req for req in new_requests 
+                                               if 'api' in req.lower() or 
+                                                  'content' in req.lower() or 
+                                                  'page' in req.lower()]
+                            
+                            if relevant_requests:
+                                is_changed = True
+                                change_type = "network"
+                                selenium_logger.info(f"Обнаружены новые API запросы: {', '.join(relevant_requests)}")
                         
+                        # Делаем скриншот, если обнаружены изменения
+                        if is_changed:
+                            # Небольшая задержка, чтобы страница полностью загрузилась
+                            time.sleep(1.5)
+                            
+                            # Увеличиваем счетчик страниц
+                            current_page += 1
+                            
+                            # Обновляем callback при наличии
+                            if self.current_page_callback:
+                                self.current_page_callback(current_page, max_pages)
+                            
+                            # Делаем скриншот
+                            screenshot_path = os.path.join(screenshots_dir, f"page_{current_page:04d}.png")
+                            selenium_logger.info(f"Обнаружено изменение страницы ({change_type})! Делаем скриншот страницы {current_page}")
+                            self.driver.save_screenshot(screenshot_path)
+                            
+                            # Выводим сообщение о сохранении
+                            print(f"✓ Сохранен скриншот страницы {current_page}: {screenshot_path}")
+                            
+                            # Обновляем хеш последней страницы
+                            last_page_content_hash = current_content_hash
+                            last_network_requests = current_network_requests
+                            
+                        # Короткая пауза между проверками
+                        time.sleep(0.5)
+                        
+                    except Exception as loop_error:
+                        selenium_logger.error(f"Ошибка в цикле мониторинга: {str(loop_error)}")
+                        time.sleep(1)  # Небольшая пауза перед следующей итерацией
+                
             except KeyboardInterrupt:
-                selenium_logger.info("Получен сигнал прерывания, завершаем режим ручного скриншота")
+                selenium_logger.info("Получен сигнал прерывания, завершаем режим автоматического скриншота")
             
-            selenium_logger.info(f"Режим ручного перелистывания завершен. Создано {current_page} скриншотов.")
+            selenium_logger.info(f"Режим автоматического обнаружения перелистывания завершен. Создано {current_page} скриншотов.")
             selenium_logger.info(f"Скриншоты сохранены в директории: {screenshots_dir}")
             return True
             
         except Exception as e:
-            selenium_logger.error(f"Ошибка в режиме ручного перелистывания: {str(e)}")
+            selenium_logger.error(f"Ошибка в режиме автоматического обнаружения перелистывания: {str(e)}")
             selenium_logger.error(f"Трассировка: {traceback.format_exc()}")
             return False
+    
+    def _setup_network_monitor(self):
+        """
+        Устанавливает JavaScript-скрипт для мониторинга сетевых запросов
+        """
+        try:
+            monitor_script = """
+            // Создаем массив для хранения запросов
+            window.capturedRequests = window.capturedRequests || [];
+            
+            // Создаем новый объект Performance Observer
+            if (!window.kindleNetworkObserver) {
+                window.kindleNetworkObserver = new PerformanceObserver((list) => {
+                    list.getEntries().forEach((entry) => {
+                        // Фильтруем запросы API
+                        if (entry.initiatorType === 'xmlhttprequest' || entry.initiatorType === 'fetch') {
+                            // Добавляем URL в список запросов
+                            window.capturedRequests.push(entry.name);
+                        }
+                    });
+                });
+                
+                // Начинаем наблюдение за resource entries
+                window.kindleNetworkObserver.observe({entryTypes: ['resource']});
+            }
+            
+            // Функция для получения списка запросов
+            window.getKindleNetworkRequests = function() {
+                return window.capturedRequests;
+            };
+            """
+            
+            self.driver.execute_script(monitor_script)
+            selenium_logger.info("Установлен скрипт мониторинга сетевых запросов")
+            
+        except Exception as e:
+            selenium_logger.error(f"Ошибка при установке мониторинга сети: {str(e)}")
+    
+    def _get_network_requests(self):
+        """
+        Получает список сетевых запросов из JavaScript
+        
+        :return: Список URL запросов
+        """
+        try:
+            requests = self.driver.execute_script("return window.getKindleNetworkRequests ? window.getKindleNetworkRequests() : [];")
+            return requests
+        except Exception as e:
+            selenium_logger.error(f"Ошибка при получении сетевых запросов: {str(e)}")
+            return []
+    
+    def _get_content_for_comparison(self):
+        """
+        Получает содержимое страницы для сравнения
+        
+        :return: Строка с текстовым содержимым страницы
+        """
+        try:
+            # Получаем текстовое содержимое всех видимых элементов
+            script = """
+            function getVisibleText() {
+                // Получаем все элементы с текстом в основной области чтения
+                let elements = document.querySelectorAll('.page-content, .book-content, .kindle-content, main, .app-reader, .app-view');
+                
+                // Если не нашли специальных элементов, используем body
+                if (!elements || elements.length === 0) {
+                    elements = document.querySelectorAll('body');
+                }
+                
+                // Собираем текст из всех элементов
+                let text = Array.from(elements)
+                    .map(el => el.innerText)
+                    .join('\\n');
+                
+                return text;
+            }
+            return getVisibleText();
+            """
+            content = self.driver.execute_script(script)
+            
+            # Если не смогли получить текст через innerText
+            if not content or len(content) < 20:
+                # Возвращаем HTML-структуру основных элементов
+                script = """
+                function getStructure() {
+                    // Специфичные селекторы для Kindle Reader
+                    const kindleElements = document.querySelectorAll('.book-view, .pageContainer, [data-testid="book-container"], .page, .app-reader');
+                    if (kindleElements && kindleElements.length > 0) {
+                        return Array.from(kindleElements).map(el => el.outerHTML).join('');
+                    }
+                    
+                    // Общий запасной вариант
+                    let content = document.querySelector('main') || document.body;
+                    return content.innerHTML;
+                }
+                return getStructure();
+                """
+                content = self.driver.execute_script(script)
+            
+            return content
+            
+        except Exception as e:
+            selenium_logger.error(f"Ошибка при получении содержимого страницы: {str(e)}")
+            # В случае ошибки возвращаем page_source
+            return self.driver.page_source
+    
+    def _hash_content(self, content):
+        """
+        Создает хеш строки для быстрого сравнения
+        
+        :param content: Строка содержимого
+        :return: SHA-256 хеш строки
+        """
+        import hashlib
+        if not content:
+            return ""
+        
+        try:
+            # Нормализуем содержимое, убирая лишние пробелы
+            content = re.sub(r'\s+', ' ', content).strip()
+            
+            # Удаляем динамически меняющиеся элементы (время, счетчики и т.д.)
+            content = re.sub(r'\d{2}:\d{2}:\d{2}', '', content)  # Время
+            content = re.sub(r'\d{1,2}\/\d{1,2}\/\d{2,4}', '', content)  # Даты
+            
+            # Удаляем элементы навигации, которые меняются при перелистывании
+            content = re.sub(r'(Стр.|Страница|Page)\s*\d+\s*(из|of)\s*\d+', '', content)
+            content = re.sub(r'\d+\s*%', '', content)  # Проценты прогресса
+            
+            # Создаем хеш
+            return hashlib.sha256(content.encode('utf-8')).hexdigest()
+        except Exception as e:
+            selenium_logger.error(f"Ошибка при хешировании контента: {str(e)}")
+            # В случае ошибки возвращаем простой хеш
+            return hashlib.md5(str(content).encode('utf-8')).hexdigest()
 
     @log_function_call(selenium_logger)
     def navigate_with_screenshots(self):
@@ -1244,10 +1406,20 @@ class KindleAutoAPIScraper:
                 self.cleanup()
                 return False
                 
-            # Создаем скриншоты страниц книги (ручной режим)
-            selenium_logger.info("Создаем скриншоты страниц в ручном режиме - пользователь перелистывает, скрипт делает скриншоты")
+            # Создаем скриншоты страниц книги (автоматический режим обнаружения изменений)
+            selenium_logger.info("Создаем скриншоты страниц в режиме автоматического обнаружения - просто перелистывайте страницы")
+            
+            # Выводим инструкцию для пользователя
+            print("\n" + "="*80)
+            print("АВТОМАТИЧЕСКИЙ РЕЖИМ ОБНАРУЖЕНИЯ ПЕРЕЛИСТЫВАНИЯ АКТИВИРОВАН:")
+            print("1. Просто перелистывайте страницы книги с помощью мыши или клавиатуры")
+            print("2. Система автоматически обнаружит изменения и сделает скриншот")
+            print("3. Вам НЕ нужно нажимать Enter после каждого перелистывания")
+            print("4. Нажмите Ctrl+C когда закончите чтение/скриншоты")
+            print("="*80 + "\n")
+            
             if not self.manual_screenshots_mode():
-                selenium_logger.warning("Не удалось создать скриншоты страниц книги в ручном режиме")
+                selenium_logger.warning("Не удалось создать скриншоты страниц книги в автоматическом режиме")
                 # Продолжаем выполнение, так как это не критическая ошибка
             
             # Перехватываем сетевой трафик
